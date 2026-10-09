@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>单词合集 · Day 1–33</title>
+<style>
+  :root {
+    --bg: #faf9f7; --card: #ffffff; --ink: #1a1a1a; --sub: #555;
+    --muted: #8a8a8a; --line: #ececec; --accent: #b45309; --accent-bg: #fdf3e7;
+    --phr: #2f6f8f; --phr-bg: #e9f2f7;
+    --btn: #f5f3f0; --btn-active: #e8e4de;
+    --ok: #2f7d4f; --ok-bg: #eaf5ee; --no: #b3402f; --no-bg: #fbeeeb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1b1a; --card: #262523; --ink: #f0efed; --sub: #b8b6b2;
+      --muted: #8a8783; --line: #383633; --accent: #f0a860;
+      --accent-bg: #3a2f22; --phr: #7fc0dd; --phr-bg: #1f2c33;
+      --btn: #333230; --btn-active: #444240;
+      --ok: #6dc48d; --ok-bg: #23301f; --no: #e8836f; --no-bg: #331f1c;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0 auto; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+    padding: 16px; max-width: 620px;
+  }
+  h1 { font-size: 19px; margin: 6px 0 4px; }
+  .sub { font-size: 13px; color: var(--muted); margin: 0 0 14px; }
+  .bar {
+    display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center;
+    background: var(--card); border-radius: 12px; padding: 10px 12px; margin-bottom: 14px;
+  }
+  .bar label { font-size: 13px; color: var(--sub); }
+  select {
+    font-size: 14px; padding: 5px 8px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+  }
+  .progress { font-size: 13px; color: var(--muted); margin-left: auto; }
+  .track { height: 4px; background: var(--line); border-radius: 4px; overflow: hidden; margin-bottom: 14px; }
+  .fill { height: 100%; background: var(--accent); width: 0%; transition: width .25s; }
+  .card { background: var(--card); border-radius: 14px; padding: 20px 18px; margin-bottom: 14px; }
+  .prompt-cn { font-size: 18px; font-weight: 600; margin: 0; }
+  .prompt-pos { font-size: 12px; padding: 2px 9px; border-radius: 6px; background: var(--accent-bg); color: var(--accent); }
+  .prompt-pos.p { background: var(--phr-bg); color: var(--phr); }
+  .daytag { font-size: 12px; color: var(--muted); }
+  .cloze { font-size: 15px; font-style: italic; line-height: 1.75; margin: 14px 0 0; color: var(--sub); }
+  .blank { color: var(--accent); font-weight: 600; font-style: normal; letter-spacing: 1px; }
+  .clozetr { font-size: 13px; color: var(--muted); margin: 6px 0 0; line-height: 1.6; display: none; }
+  .clozetr.show { display: block; }
+  .answer { display: none; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .answer.show { display: block; }
+  .aw { font-size: 21px; font-weight: 700; }
+  .ipa { font-size: 13px; color: var(--muted); font-family: ui-monospace, monospace; margin-left: 8px; }
+  .usage {font-size:13px;line-height:1.65;color:var(--sub);margin:12px 0 0;}
+  .en { font-size: 15px; font-style: italic; margin: 12px 0 0; line-height: 1.6; }
+  .tr { font-size: 13px; color: var(--muted); margin: 3px 0 0; line-height: 1.6; }
+  .row { display: flex; gap: 8px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+  button {
+    font-size: 15px; padding: 11px 16px; border: none; border-radius: 10px;
+    background: var(--btn); color: var(--ink); cursor: pointer; font-family: inherit;
+  }
+  button:active { background: var(--btn-active); }
+  button.primary { background: var(--accent); color: #fff; flex: 1; font-weight: 600; }
+  button.ok { background: var(--ok-bg); color: var(--ok); flex: 1; font-weight: 600; }
+  button.no { background: var(--no-bg); color: var(--no); flex: 1; font-weight: 600; }
+  button.say { width: 44px; padding: 11px 0; font-size: 17px; }
+  #done { display: none; }
+  #done h2 { font-size: 18px; margin: 0 0 8px; }
+  .miss { padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; }
+  .miss span { color: var(--muted); font-size: 13px; margin-left: 8px; }
+</style>
+</head>
+<body>
+<h1>单词合集 · Day 1–33</h1>
+<p class="sub">Day 1–33 · 330 项｜先看中文和挖空例句，再翻开答案；支持朗读、口音切换与错题复习。</p>
+
+<div class="bar">
+  <label>范围</label>
+  <select id="scope">
+    <option value="0">全部 330 项</option>
+    <option value="p">只练短语（116）</option>
+    <option value="v">只练单词（214）</option>
+    <option value="b">羽毛球专题（14）</option>
+    <option value="z">澳洲专题（33）</option>
+    <option value="r">最近四天（Day 30–33）</option>
+    <option value="m">中段（Day 8–28）</option>
+    <option value="e">较早的（Day 1–7）</option>
+    <option value="1">Day 1</option><option value="2">Day 2</option>
+    <option value="3">Day 3</option><option value="4">Day 4</option>
+    <option value="5">Day 5</option><option value="6">Day 6</option>
+    <option value="7">Day 7</option><option value="8">Day 8</option>
+    <option value="9">Day 9</option><option value="10">Day 10</option>
+    <option value="11">Day 11</option><option value="12">Day 12</option>
+    <option value="13">Day 13</option><option value="14">Day 14</option>
+    <option value="15">Day 15</option><option value="16">Day 16</option>
+    <option value="17">Day 17</option><option value="18">Day 18</option>
+    <option value="19">Day 19</option><option value="20">Day 20</option>
+    <option value="21">Day 21</option><option value="22">Day 22</option>
+    <option value="23">Day 23</option><option value="24">Day 24</option>
+    <option value="25">Day 25</option><option value="26">Day 26</option>
+    <option value="27">Day 27</option><option value="28">Day 28</option>
+    <option value="29">Day 29</option><option value="30">Day 30</option>
+    <option value="31">Day 31</option><option value="32">Day 32</option><option value="33">Day 33</option>
+  </select>
+  <label for="accentSelect">口音</label><select id="accentSelect"><option value="en-AU">🇦🇺 澳洲</option><option value="en-GB">🇬🇧 英国</option><option value="en-US">🇺🇸 美国</option></select>
+  <button id="restart" style="font-size:13px;padding:6px 12px;">重新开始</button>
+  <span class="progress" id="prog"></span>
+</div>
+<div class="track"><div class="fill" id="fill"></div></div>
+
+<div id="quiz">
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <p class="prompt-cn" id="pcn"></p>
+      <span class="prompt-pos" id="ppos"></span>
+      <span class="daytag" id="pday"></span>
+    </div>
+    <p class="cloze" id="cloze"></p>
+    <p class="clozetr" id="clozetr"></p>
+    <div class="answer" id="ans">
+      <div style="display:flex;align-items:center;flex-wrap:wrap;">
+        <span class="aw" id="aw"></span><span class="ipa" id="aipa"></span>
+      </div>
+      <p class="usage" id="usage"></p>
+       <div class="row"><button class="say" id="btnWord" aria-label="朗读单词">🔊</button><span class="tr">朗读单词 / 短语</span></div>
+       <p class="en" id="aen"></p>
+      <p class="tr" id="atr"></p>
+    </div>
+    <div class="row" id="rowReveal">
+      <button class="primary" id="reveal">显示答案</button>
+    </div>
+    <div class="row" id="rowJudge" style="display:none;">
+      <button class="no" id="btnNo">还不熟</button>
+      <button class="ok" id="btnOk">记得</button>
+      <button class="say" id="btnSay" aria-label="朗读例句">🔊</button>
+    </div>
+  </div>
+</div>
+
+<div id="done" class="card">
+  <h2 id="doneTitle"></h2>
+  <p class="sub" id="doneSub" style="margin-bottom:4px;"></p>
+  <div id="missList"></div>
+  <div class="row">
+    <button class="primary" id="again">再练一轮「还不熟」</button>
+  </div>
+</div>
+
+<script>
+const DATA = [
+ {d:1,w:"triage",pos:"v. / n.",p:"/ˈtriːɑːʒ/",cn:"分诊；按优先级处理",k:"triage",ex:"We need to triage the P2 alerts before the change window opens.",tr:"我们得在变更窗口开始前，先把 P2 告警按优先级处理掉。"},
+ {d:1,w:"discrepancy",pos:"n.",p:"/dɪˈskrepənsi/",cn:"不一致、出入",k:"discrepancy",ex:"There's a discrepancy between the BigFix logs and the CloudWatch metrics.",tr:"BigFix 日志和 CloudWatch 监控数据之间存在不一致。"},
+ {d:1,w:"expedite",pos:"v.",p:"/ˈekspədaɪt/",cn:"加快（进度）",k:"expedite",ex:"Could you help expedite the approval for this RFC?",tr:"能帮忙加快一下这个 RFC 的审批吗？"},
+ {d:1,w:"intermittent",pos:"adj.",p:"/ˌɪntəˈmɪtənt/",cn:"间歇性的（反复出现）",k:"intermittent",ex:"Users are reporting intermittent connection timeouts to the RDS instance.",tr:"用户反馈连接 RDS 实例时出现间歇性超时。"},
+ {d:1,w:"contingency",pos:"n.",p:"/kənˈtɪndʒənsi/",cn:"应急方案",k:"contingency",ex:"Keep some cash as a contingency in case the market dips further.",tr:"留一些现金以备不时之需，万一市场继续下跌。"},
+ {d:1,w:"composure",pos:"n.",p:"/kəmˈpəʊʒə/",cn:"沉着、稳定性",k:"composure",ex:"Even over mid-corner bumps, the BRZ maintains its composure.",tr:"即使弯中遇到颠簸，BRZ 依然保持稳定沉着。"},
+ {d:1,w:"secluded",pos:"adj.",p:"/sɪˈkluːdɪd/",cn:"僻静的、隐蔽的",k:"secluded",ex:"We found a secluded beach an hour's drive from Brisbane.",tr:"我们在离布里斯班车程一小时的地方找到了一片僻静的海滩。"},
+ {d:1,w:"nuanced",pos:"adj.",p:"/ˈnjuːɑːnst/",cn:"有层次的、细腻的",k:"nuanced",ex:"This washed Ethiopian has a nuanced acidity, citrus up front and floral at the finish.",tr:"这支水洗埃塞的酸质很有层次，入口是柑橘调，尾段带花香。"},
+ {d:1,w:"frothy",pos:"adj.",p:"/ˈfrɒθi/",cn:"起泡沫的；（估值）虚高的",k:"frothy",ex:"Nasdaq valuations are looking a bit frothy.",tr:"纳斯达克的估值看起来有点虚高了。"},
+ {d:1,w:"rip-off",pos:"n.",p:"/ˈrɪpɒf/",cn:"宰客、坑钱",k:"rip-off",ex:"Forty dollars for airport parking? What a rip-off.",tr:"机场停车要 40 刀？太宰人了。"},
+
+ {d:2,w:"remediate",pos:"v.",p:"/rɪˈmiːdieɪt/",cn:"修复、整改",k:"remediate",ex:"After the RCA, we scheduled a change to remediate the misconfigured security group.",tr:"复盘之后，我们安排了一次变更来修复配置错误的安全组。"},
+ {d:2,w:"culprit",pos:"n.",p:"/ˈkʌlprɪt/",cn:"罪魁祸首、（问题的）根源",k:"culprit",ex:"The stale IAM principal ID turned out to be the culprit behind the access denials.",tr:"最后发现，那个失效的 IAM principal ID 才是拒绝访问的罪魁祸首。"},
+ {d:2,w:"bottleneck",pos:"n.",p:"/ˈbɒtlnek/",cn:"瓶颈、制约点",k:"bottleneck",ex:"IP exhaustion in the VPC CNI became the main bottleneck for scaling the EKS cluster.",tr:"VPC CNI 的 IP 耗尽成了 EKS 集群扩容的主要瓶颈。"},
+ {d:2,w:"tactile",pos:"adj.",p:"/ˈtæktaɪl/",cn:"有触感的、手感反馈好的",k:"tactile",ex:"The BRZ's steering is wonderfully tactile, you feel exactly what the front tyres are doing.",tr:"BRZ 的转向手感极好，前轮的每一个动作你都能清晰感受到。"},
+ {d:2,w:"progressive",pos:"adj.",p:"/prəˈɡresɪv/",cn:"渐进的、线性增强的",k:"progressive",ex:"The brake pedal has a progressive feel, which makes threshold braking easier on track.",tr:"刹车踏板的脚感是渐进式的，赛道上做临界制动更容易掌握。"},
+ {d:2,w:"velvety",pos:"adj.",p:"/ˈvelvəti/",cn:"丝滑的、如天鹅绒般顺滑的",k:"velvety",ex:"Properly steamed milk should feel velvety, not stiff and bubbly.",tr:"打得好的奶泡应该是丝滑的，而不是又硬又多气泡。"},
+ {d:2,w:"robust",pos:"adj.",p:"/rəʊˈbʌst/",cn:"浓郁醇厚的；稳健的",k:"robust",ex:"This Sumatra has a robust, earthy body that stands up well to milk.",tr:"这支苏门答腊酒体浓郁、带泥土气息，加奶也压不住。"},
+ {d:2,w:"resilient",pos:"adj.",p:"/rɪˈzɪliənt/",cn:"有韧性的、抗跌的",k:"resilient",ex:"Despite the sell-off, the Nasdaq has been surprisingly resilient this quarter.",tr:"尽管出现了抛售，纳斯达克本季度的抗跌表现出人意料。"},
+ {d:2,w:"detour",pos:"n. / v.",p:"/ˈdiːtʊə/",cn:"绕道、绕行路线",k:"detour",ex:"We took a scenic detour through the Yarra Valley on the way to Melbourne.",tr:"去墨尔本的路上，我们绕道穿过了风景优美的雅拉河谷。"},
+ {d:2,w:"hospitable",pos:"adj.",p:"/hɒˈspɪtəbl/",cn:"好客的、热情周到的",k:"hospitable",ex:"The locals in Brisbane were incredibly hospitable and gave us great tips.",tr:"布里斯班的当地人非常热情好客，给了我们很多好建议。"},
+
+ {d:3,w:"provision",pos:"v.",p:"/prəˈvɪʒn/",cn:"配置、开通（资源）",k:"provision",ex:"The Terraform pipeline can provision a new AWS China account in under an hour.",tr:"这条 Terraform 流水线能在一小时内开通一个新的 AWS 中国区账号。"},
+ {d:3,w:"throttle",pos:"v. / n.",p:"/ˈθrɒtl/",cn:"限流、节流；油门",k:"throttling",ex:"The API started throttling our requests once we exceeded the rate limit.",tr:"一旦超过速率上限，API 就开始对我们的请求限流。"},
+ {d:3,w:"streamline",pos:"v.",p:"/ˈstriːmlaɪn/",cn:"精简、简化（流程）",k:"streamlined",ex:"We streamlined the patching workflow to cut the change window in half.",tr:"我们精简了打补丁的流程，把变更窗口缩短了一半。"},
+ {d:3,w:"nimble",pos:"adj.",p:"/ˈnɪmbl/",cn:"灵活敏捷的",k:"nimble",ex:"The BRZ feels remarkably nimble through a tight chicane.",tr:"BRZ 在狭窄的连续弯里显得格外灵活敏捷。"},
+ {d:3,w:"poised",pos:"adj.",p:"/pɔɪzd/",cn:"沉稳从容的；蓄势待发的",k:"poised",ex:"The chassis stays poised even when you trail-brake into the apex.",tr:"即便你拖刹进弯心，底盘依然保持沉稳。"},
+ {d:3,w:"aromatic",pos:"adj.",p:"/ˌærəˈmætɪk/",cn:"芳香馥郁的",k:"aromatic",ex:"Freshly ground beans fill the kitchen with an aromatic scent.",tr:"刚磨好的咖啡豆让厨房充满馥郁的香气。"},
+ {d:3,w:"lingering",pos:"adj.",p:"/ˈlɪŋɡərɪŋ/",cn:"余韵悠长的、久久不散的",k:"lingering",ex:"This natural Ethiopian leaves a lingering, wine-like finish.",tr:"这支日晒埃塞留下一段悠长的、类似红酒的余韵。"},
+ {d:3,w:"volatile",pos:"adj.",p:"/ˈvɒlətaɪl/",cn:"波动剧烈的、易变的",k:"volatile",ex:"Tech stocks have been especially volatile ahead of the earnings season.",tr:"财报季前科技股的波动一直特别剧烈。"},
+ {d:3,w:"diversify",pos:"v.",p:"/daɪˈvɜːsɪfaɪ/",cn:"分散（投资）、多元化",k:"diversify",ex:"Spreading money across index funds helps diversify your risk.",tr:"把资金分散到多只指数基金有助于分散风险。"},
+ {d:3,w:"bustling",pos:"adj.",p:"/ˈbʌslɪŋ/",cn:"熙攘热闹的",k:"bustling",ex:"Melbourne's laneways are bustling with cafés and street art.",tr:"墨尔本的小巷里满是咖啡馆和街头艺术，热闹非凡。"},
+
+ {d:4,w:"cumbersome",pos:"adj.",p:"/ˈkʌmbəsəm/",cn:"繁琐笨重的、不好用的",k:"cumbersome",ex:"The current approval process is far too cumbersome for emergency changes.",tr:"目前的审批流程对紧急变更来说实在太繁琐了。"},
+ {d:4,w:"reconcile",pos:"v.",p:"/ˈrekənsaɪl/",cn:"核对、使一致（对账）",k:"reconcile",ex:"I had to reconcile the patch report with what the agent actually logged.",tr:"我得把补丁报告和 agent 实际记录的日志核对一遍。"},
+ {d:4,w:"deprecate",pos:"v.",p:"/ˈdeprəkeɪt/",cn:"弃用、不再推荐使用",k:"deprecated",ex:"That API version has been deprecated, so we should migrate before the cutoff.",tr:"那个 API 版本已被弃用，我们应该在截止日期前完成迁移。"},
+ {d:4,w:"oversight",pos:"n.",p:"/ˈəʊvəsaɪt/",cn:"疏忽；监管",k:"oversight",ex:"Deleting the mount target was an oversight, not a deliberate change.",tr:"删除挂载点是一次疏忽，并非有意的变更。"},
+ {d:4,w:"planted",pos:"adj.",p:"/ˈplɑːntɪd/",cn:"（车）抓地扎实、贴地感强",k:"planted",ex:"With the new coilovers, the car feels much more planted at high speed.",tr:"换上新绞牙避震后，这台车高速下的贴地感扎实多了。"},
+ {d:4,w:"astringent",pos:"adj.",p:"/əˈstrɪndʒənt/",cn:"涩口的、收敛感强的",k:"astringent",ex:"If the grind is too fine, the espresso comes out bitter and astringent.",tr:"如果研磨太细，浓缩萃出来会又苦又涩。"},
+ {d:4,w:"prudent",pos:"adj.",p:"/ˈpruːdnt/",cn:"审慎稳妥的",k:"prudent",ex:"It's prudent to keep six months of expenses in cash before investing more.",tr:"在加大投资之前，留出六个月的开销做现金储备是比较审慎的做法。"},
+ {d:4,w:"compounding",pos:"n.",p:"/kəmˈpaʊndɪŋ/",cn:"复利（效应）",k:"compounding",ex:"The real power of index investing comes from compounding over decades.",tr:"指数投资真正的威力来自几十年的复利累积。"},
+ {d:4,w:"laid-back",pos:"adj.",p:"/ˌleɪd ˈbæk/",cn:"悠闲随性的、不紧不慢的",k:"laid-back",ex:"Brisbane has a far more laid-back feel than Sydney.",tr:"布里斯班的氛围比悉尼要悠闲随性得多。"},
+ {d:4,w:"quaint",pos:"adj.",p:"/kweɪnt/",cn:"古雅别致的、小而有味道的",k:"quaint",ex:"We stayed in a quaint little town on the road to the Great Ocean Road.",tr:"去大洋路的路上，我们住在一个古雅的小镇里。"},
+
+ {d:5,w:"hectic",pos:"adj.",p:"/ˈhektɪk/",cn:"忙乱的、兵荒马乱的",k:"hectic",ex:"It's been a hectic week with two major incidents back to back.",tr:"这周忙翻了，接连出了两起重大故障。"},
+ {d:5,w:"juggle",pos:"v.",p:"/ˈdʒʌɡl/",cn:"同时应付、兼顾（多件事）",k:"juggling",ex:"I'm juggling three change requests and an on-call shift this week.",tr:"这周我同时忙着三个变更申请，还要值班。"},
+ {d:5,w:"sluggish",pos:"adj.",p:"/ˈslʌɡɪʃ/",cn:"迟缓的、反应慢的",k:"sluggish",ex:"The database has been sluggish since the disk hit ninety percent.",tr:"自从磁盘用到 90%，数据库就一直很迟缓。"},
+ {d:5,w:"crisp",pos:"adj.",p:"/krɪsp/",cn:"干脆利落的；清爽的",k:"crisp",ex:"The short-throw shifter gives you a really crisp gear change.",tr:"这套短行程换挡杆的换挡手感非常干脆利落。"},
+ {d:5,w:"brisk",pos:"adj.",p:"/brɪsk/",cn:"轻快的、爽利的",k:"brisk",ex:"We took a brisk walk along the river before the cafés opened.",tr:"趁咖啡馆还没开门，我们沿着河边快步走了一段。"},
+ {d:5,w:"pricey",pos:"adj.",p:"/ˈpraɪsi/",cn:"偏贵的（口语）",k:"pricey",ex:"Coffee in Melbourne is good, though a bit pricey compared to Shanghai.",tr:"墨尔本的咖啡很不错，就是比上海贵一些。"},
+ {d:5,w:"give someone a heads-up",pos:"phr.",p:"/ˈhedz ʌp/",cn:"提前打个招呼、事先知会一声",k:"a heads-up",ex:"Just a heads-up: the patching window may run past midnight.",tr:"提前跟你说一声：打补丁的窗口可能会拖到午夜以后。"},
+ {d:5,w:"circle back",pos:"phr. v.",p:"/ˈsɜːkl bæk/",cn:"回头再聊、稍后再跟进",k:"circle back",ex:"Let's circle back on the RDS upgrade once the test results are in.",tr:"等测试结果出来，我们再回头讨论 RDS 升级的事。"},
+ {d:5,w:"off the top of my head",pos:"phr.",p:"/ɒf ðə tɒp əv maɪ hed/",cn:"凭印象说、一时想到的（不确定）",k:"Off the top of my head",ex:"Off the top of my head, I'd say around twenty servers were affected.",tr:"我凭印象说，大概有二十台服务器受影响。"},
+ {d:5,w:"call it a day",pos:"phr.",p:"/kɔːl ɪt ə deɪ/",cn:"今天就到这儿吧、收工",k:"call it a day",ex:"The logs can wait until tomorrow — let's call it a day.",tr:"日志明天再看吧，今天就到这儿。"},
+
+ {d:6,w:"backlog",pos:"n.",p:"/ˈbæklɒɡ/",cn:"积压的待办工作",k:"backlog",ex:"We're still working through a backlog of patching tickets from last month.",tr:"我们还在处理上个月积压下来的打补丁工单。"},
+ {d:6,w:"circumvent",pos:"v.",p:"/ˌsɜːkəmˈvent/",cn:"规避、绕过（规则或管控）",k:"circumvent",ex:"Please don't circumvent the change process just to save time.",tr:"请不要为了省时间就绕过变更流程。"},
+ {d:6,w:"erratic",pos:"adj.",p:"/ɪˈrætɪk/",cn:"飘忽不定的、时好时坏的",k:"erratic",ex:"The node's memory usage has been erratic since the last deployment.",tr:"上次部署之后，这个节点的内存占用一直飘忽不定。"},
+ {d:6,w:"taut",pos:"adj.",p:"/tɔːt/",cn:"紧绷的、绷得住的（底盘）",k:"taut",ex:"The KW coilovers give the car a taut, controlled feel over bumps.",tr:"这套 KW 绞牙让车过颠簸时有一种紧绷、受控的感觉。"},
+ {d:6,w:"syrupy",pos:"adj.",p:"/ˈsɪrəpi/",cn:"糖浆般浓稠的",k:"syrupy",ex:"A well-pulled ristretto should be thick and almost syrupy.",tr:"萃取得好的 ristretto 应该浓稠得近乎糖浆感。"},
+ {d:6,w:"balmy",pos:"adj.",p:"/ˈbɑːmi/",cn:"温暖宜人的（天气）",k:"balmy",ex:"Brisbane was still balmy in early October.",tr:"十月初的布里斯班依然温暖宜人。"},
+ {d:6,w:"touch base",pos:"phr. v.",p:"/tʌtʃ beɪs/",cn:"碰个头、简短沟通一下",k:"touch base",ex:"Let's touch base on Friday before the change freeze kicks in.",tr:"变更冻结开始之前，我们周五碰个头。"},
+ {d:6,w:"be on the same page",pos:"phr.",p:"/ɒn ðə seɪm peɪdʒ/",cn:"理解一致、达成共识",k:"on the same page",ex:"I'd like to make sure we're all on the same page before I send this out.",tr:"在我发出去之前，想确认一下大家的理解是一致的。"},
+ {d:6,w:"drop the ball",pos:"phr.",p:"/drɒp ðə bɔːl/",cn:"掉链子、办事失误",k:"dropped the ball",ex:"I dropped the ball on that ticket — I forgot to update the status.",tr:"那个工单我掉链子了，忘了更新状态。"},
+ {d:6,w:"worth a shot",pos:"phr.",p:"/wɜːθ ə ʃɒt/",cn:"值得一试",k:"worth a shot",ex:"Prefix delegation might not fix it, but it's worth a shot.",tr:"前缀委派未必能解决，但值得一试。"},
+
+ {d:7,w:"inadvertently",pos:"adv.",p:"/ˌɪnədˈvɜːtəntli/",cn:"无意中、不小心地",k:"inadvertently",ex:"The script inadvertently removed the versionlock before the upgrade.",tr:"该脚本在升级前无意中移除了 versionlock。"},
+ {d:7,w:"preemptive",pos:"adj.",p:"/priˈemptɪv/",cn:"先发的、预防性的",k:"preemptive",ex:"We did a preemptive reboot rather than waiting for the node to fail.",tr:"我们主动做了一次预防性重启，而不是等节点挂掉。"},
+ {d:7,w:"granular",pos:"adj.",p:"/ˈɡrænjələ/",cn:"细粒度的、颗粒感的",k:"granular",ex:"IAM lets you define granular permissions down to a single action.",tr:"IAM 允许你把权限细化到单个操作。"},
+ {d:7,w:"jittery",pos:"adj.",p:"/ˈdʒɪtəri/",cn:"心慌手抖的；（市场）神经紧张的",k:"jittery",ex:"Too much espresso before a track day leaves me jittery.",tr:"赛道日之前喝太多浓缩会让我心慌手抖。"},
+ {d:7,w:"winding",pos:"adj.",p:"/ˈwaɪndɪŋ/",cn:"蜿蜒曲折的",k:"winding",ex:"The road up to Kamikochi is narrow and winding.",tr:"通往上高地的那条路又窄又蜿蜒。"},
+ {d:7,w:"steep",pos:"adj. / v.",p:"/stiːp/",cn:"陡峭的；（价格）高昂的；浸泡",k:"steep",ex:"The learning curve for EKS networking is pretty steep.",tr:"EKS 网络的学习曲线相当陡。"},
+ {d:7,w:"bear with me",pos:"phr.",p:"/beə wɪð miː/",cn:"请稍等一下、担待一下",k:"Bear with me",ex:"Bear with me while I pull up the CloudWatch dashboard.",tr:"稍等我一下，我把 CloudWatch 面板调出来。"},
+ {d:7,w:"run something by someone",pos:"phr. v.",p:"/rʌn ˈsʌmθɪŋ baɪ/",cn:"跟某人过一下、征求一下意见",k:"run this change plan by",ex:"Let me run this change plan by the security team first.",tr:"我先把这份变更方案跟安全团队过一下。"},
+ {d:7,w:"in hindsight",pos:"phr.",p:"/ɪn ˈhaɪndsaɪt/",cn:"事后回想、现在看来",k:"In hindsight",ex:"In hindsight, we should have tested the patch in dev first.",tr:"事后回想，我们本该先在 dev 环境测这个补丁。"},
+ {d:7,w:"loop someone in",pos:"phr. v.",p:"/luːp ˈsʌmwʌn ɪn/",cn:"把某人拉进来知会一声",k:"loop you in",ex:"I'll loop you in on the thread with the global team.",tr:"我会把你加进跟全球团队的那条邮件线里。"},
+
+ {d:8,w:"overhaul",pos:"n. / v.",p:"/ˈəʊvəhɔːl/",cn:"彻底整改、大修",k:"overhaul",ex:"The patching process needs a complete overhaul, not another quick fix.",tr:"打补丁的流程需要彻底重做，而不是再打一个补丁了事。"},
+ {d:8,w:"stopgap",pos:"n. / adj.",p:"/ˈstɒpɡæp/",cn:"权宜之计、临时顶一下的办法",k:"stopgap",ex:"Restarting the service is only a stopgap until we fix the memory leak.",tr:"重启服务只是权宜之计，真正要解决的是内存泄漏。"},
+ {d:8,w:"scrutiny",pos:"n.",p:"/ˈskruːtəni/",cn:"仔细审查、严格审视",k:"scrutiny",ex:"Any change to production networking gets extra scrutiny from the security team.",tr:"任何生产网络的变更都会受到安全团队的额外审查。"},
+ {d:8,w:"skittish",pos:"adj.",p:"/ˈskɪtɪʃ/",cn:"躁动不安的；（车尾）发飘不安分的",k:"skittish",ex:"The rear end feels skittish over bumps when the damping is too stiff.",tr:"阻尼调得太硬时，车尾过颠簸会显得躁动不安。"},
+ {d:8,w:"muted",pos:"adj.",p:"/ˈmjuːtɪd/",cn:"平淡的、不强烈的（反应/风味）",k:"muted",ex:"The market reaction to the earnings was surprisingly muted.",tr:"市场对这份财报的反应出奇地平淡。"},
+ {d:8,w:"grueling",pos:"adj.",p:"/ˈɡruːəlɪŋ/",cn:"极其累人的、折磨人的",k:"grueling",ex:"A full day of track sessions is more grueling than it looks.",tr:"一整天的赛道跑下来，比看上去累多了。"},
+ {d:8,w:"keep someone posted",pos:"phr.",p:"/kiːp ˈsʌmwʌn ˈpəʊstɪd/",cn:"随时同步进展给某人",k:"keep you posted",ex:"I'll keep you posted as the patching progresses tonight.",tr:"今晚打补丁的进展我会随时同步给你。"},
+ {d:8,w:"hold off on something",pos:"phr. v.",p:"/həʊld ɒf ɒn/",cn:"先缓一缓、暂时不做",k:"hold off on",ex:"Let's hold off on the deployment until the change freeze lifts.",tr:"我们先缓一缓，等变更冻结解除再部署。"},
+ {d:8,w:"at short notice",pos:"phr.",p:"/ət ʃɔːt ˈnəʊtɪs/",cn:"临时通知、仓促之间",k:"at such short notice",ex:"Thanks for joining the call at such short notice.",tr:"感谢你这么临时地加入这个会。"},
+ {d:8,w:"iron out",pos:"phr. v.",p:"/ˈaɪən aʊt/",cn:"理顺、解决（细节或分歧）",k:"iron out",ex:"We still need to iron out a few details before the go-live.",tr:"上线之前还有几个细节需要理顺。"},
+
+ {d:9,w:"cascade",pos:"v. / n.",p:"/kæˈskeɪd/",cn:"级联、引发连锁反应",k:"cascaded",ex:"One failed mount target cascaded into a full boot failure.",tr:"一个失效的挂载点级联引发了整台机器无法启动。"},
+ {d:9,w:"contentious",pos:"adj.",p:"/kənˈtenʃəs/",cn:"有争议的、容易吵起来的",k:"contentious",ex:"Whether to put the endpoint on the consumer side turned out to be contentious.",tr:"端点该放在消费方这一侧，结果成了很有争议的问题。"},
+ {d:9,w:"finicky",pos:"adj.",p:"/ˈfɪnɪki/",cn:"难伺候的、挑剔麻烦的",k:"finicky",ex:"The old SSM agent is finicky about proxy settings.",tr:"老版本的 SSM agent 对代理设置很挑剔。"},
+ {d:9,w:"drawdown",pos:"n.",p:"/ˈdrɔːdaʊn/",cn:"回撤（从高点下跌的幅度）",k:"drawdown",ex:"I add more capital whenever the index hits a ten percent drawdown.",tr:"每当指数回撤 10%，我就追加一笔资金。"},
+ {d:9,w:"immaculate",pos:"adj.",p:"/ɪˈmækjələt/",cn:"一尘不染的、完美无瑕的",k:"immaculate",ex:"He keeps the car immaculate, even after a track day.",tr:"他把车保持得一尘不染，哪怕刚跑完赛道。"},
+ {d:9,w:"layover",pos:"n.",p:"/ˈleɪəʊvə/",cn:"中转停留（短暂等待）",k:"layover",ex:"We had a six-hour layover in Singapore on the way to Melbourne.",tr:"去墨尔本的路上，我们在新加坡中转停留了六个小时。"},
+ {d:9,w:"fall through the cracks",pos:"phr.",p:"/fɔːl θruː ðə kræks/",cn:"被漏掉、没人跟进就没了下文",k:"fall through the cracks",ex:"Let's log it now so it doesn't fall through the cracks.",tr:"现在就把它登记下来，免得这事儿被漏掉。"},
+ {d:9,w:"play it by ear",pos:"phr.",p:"/pleɪ ɪt baɪ ɪə/",cn:"看情况再定、随机应变",k:"play it by ear",ex:"We haven't booked anything for Sunday, so we'll play it by ear.",tr:"周日我们什么都没订，到时候看情况再说。"},
+ {d:9,w:"on the back burner",pos:"phr.",p:"/ɒn ðə bæk ˈbɜːnə/",cn:"暂时搁置、优先级往后放",k:"on the back burner",ex:"The dashboard project is on the back burner until Q4.",tr:"那个看板项目先搁置，等第四季度再说。"},
+ {d:9,w:"a long shot",pos:"phr.",p:"/ə lɒŋ ʃɒt/",cn:"希望不大的尝试、赌一把",k:"a long shot",ex:"Rolling back the driver is a long shot, but nothing else has worked.",tr:"回滚驱动希望不大，但别的办法都试过了。"},
+
+ {d:10,w:"exacerbate",pos:"v.",p:"/ɪɡˈzæsəbeɪt/",cn:"加剧、使恶化",k:"exacerbated",ex:"Rebooting during peak hours only exacerbated the timeouts.",tr:"在高峰期重启反而让超时问题更严重了。"},
+ {d:10,w:"convoluted",pos:"adj.",p:"/ˈkɒnvəluːtɪd/",cn:"错综复杂的、绕来绕去的",k:"convoluted",ex:"The cross-account routing setup is so convoluted that nobody wants to touch it.",tr:"这套跨账号路由绕得没人愿意碰。"},
+ {d:10,w:"compliant",pos:"adj.",p:"/kəmˈplaɪənt/",cn:"合规的；（悬架）柔顺有韧性的",k:"compliant",ex:"A compliant suspension soaks up bumps without feeling floaty.",tr:"有柔顺性的悬架能吸收颠簸，又不会发飘。"},
+ {d:10,w:"stale",pos:"adj.",p:"/steɪl/",cn:"不新鲜的；（数据）过期失效的",k:"stale",ex:"The dashboard was showing stale data from a cached query.",tr:"面板显示的是缓存查询里的过期数据。"},
+ {d:10,w:"overrated",pos:"adj.",p:"/ˌəʊvəˈreɪtɪd/",cn:"名过其实的、被高估的",k:"overrated",ex:"The tourist strip was overrated; the suburbs had far better coffee.",tr:"那条游客街名过其实，郊区的咖啡好得多。"},
+ {d:10,w:"rebalance",pos:"v.",p:"/ˌriːˈbæləns/",cn:"再平衡（调整资产配置比例）",k:"rebalance",ex:"I rebalance the portfolio once a year rather than reacting to every dip.",tr:"我一年做一次组合再平衡，而不是每次下跌都去反应。"},
+ {d:10,w:"off the beaten path",pos:"phr.",p:"/ɒf ðə ˈbiːtn pɑːθ/",cn:"人少小众、不在常规路线上的",k:"off the beaten path",ex:"The best cafés in Melbourne are off the beaten path.",tr:"墨尔本最好的咖啡馆都藏在游客少去的地方。"},
+ {d:10,w:"flag something up",pos:"phr. v.",p:"/flæɡ ˈsʌmθɪŋ ʌp/",cn:"把某事提出来、引起注意",k:"flagged it up",ex:"I flagged it up to the network team before the freeze started.",tr:"冻结开始之前，我把这件事提给网络团队了。"},
+ {d:10,w:"cut corners",pos:"phr.",p:"/kʌt ˈkɔːnəz/",cn:"图省事、偷工减料",k:"cut corners",ex:"We can't cut corners on testing just to hit the deadline.",tr:"不能为了赶截止日期就在测试上偷工减料。"},
+ {d:10,w:"get someone up to speed",pos:"phr.",p:"/ʌp tə spiːd/",cn:"让某人跟上进度、了解情况",k:"get you up to speed",ex:"Let me get you up to speed on what happened last night.",tr:"我先把昨晚发生的事跟你同步一下。"},
+
+ {d:11,w:"attest",pos:"v.",p:"/əˈtest/",cn:"证明、证实（attest to sth）",k:"attest",ex:"The logs attest to the fact that the agent never checked in.",tr:"日志可以证明该 agent 从未上报过。"},
+ {d:11,w:"defer",pos:"v.",p:"/dɪˈfɜː/",cn:"推迟；（defer to）听从某人意见",k:"deferred",ex:"We deferred the upgrade to the next maintenance window.",tr:"我们把升级推迟到了下一个维护窗口。"},
+ {d:11,w:"redundant",pos:"adj.",p:"/rɪˈdʌndənt/",cn:"冗余的（技术褒义）；多余重复的",k:"redundant",ex:"We added a redundant path so a single link failure won't take the site down.",tr:"我们加了一条冗余链路，这样单条链路故障不会导致整站中断。"},
+ {d:11,w:"docile",pos:"adj.",p:"/ˈdəʊsaɪl/",cn:"温顺听话的、好开不咬人的",k:"docile",ex:"The BRZ is docile at low speed but comes alive above four thousand rpm.",tr:"BRZ 低速时温顺听话，但过了四千转就活了。"},
+ {d:11,w:"scalding",pos:"adj.",p:"/ˈskɔːldɪŋ/",cn:"滚烫的（烫伤级别）",k:"scalding",ex:"Water straight off the boil is scalding and will burn the grounds.",tr:"刚烧开的水太烫，会把咖啡粉烫焦。"},
+ {d:11,w:"lucrative",pos:"adj.",p:"/ˈluːkrətɪv/",cn:"赚钱的、收益丰厚的",k:"lucrative",ex:"Index investing isn't exciting, but it's been quietly lucrative.",tr:"指数投资并不刺激，但一直在悄悄赚钱。"},
+ {d:11,w:"put something on hold",pos:"phr.",p:"/pʊt ɒn həʊld/",cn:"把某事挂起、暂停",k:"on hold",ex:"We've put the migration on hold until the vendor responds.",tr:"在厂商回复之前，我们把迁移暂停了。"},
+ {d:11,w:"take a rain check",pos:"phr.",p:"/teɪk ə ˈreɪn tʃek/",cn:"这次先算了、改天再约",k:"take a rain check",ex:"I'll have to take a rain check on dinner — I'm on call tonight.",tr:"晚饭我改天再约吧，今晚我值班。"},
+ {d:11,w:"be swamped",pos:"phr.",p:"/biː swɒmpt/",cn:"忙得不可开交、被淹没了",k:"swamped",ex:"I'm completely swamped this week — can we push it to Monday?",tr:"这周我忙得不可开交，能推到周一吗？"},
+ {d:11,w:"a ballpark figure",pos:"phr.",p:"/ə ˈbɔːlpɑːk ˈfɪɡə/",cn:"大概的数字、估个大致范围",k:"a ballpark figure",ex:"Can you give me a ballpark figure for how long the rollback will take?",tr:"回滚大概要多久，能给个大致的数吗？"},
+
+ {d:12,w:"pinpoint",pos:"v.",p:"/ˈpɪnpɔɪnt/",cn:"精确定位、准确指出",k:"pinpoint",ex:"CloudTrail helped us pinpoint exactly who deleted the file system.",tr:"CloudTrail 帮我们精确定位到了究竟是谁删除了该文件系统。"},
+ {d:12,w:"outage",pos:"n.",p:"/ˈaʊtɪdʒ/",cn:"服务中断、停机",k:"outage",ex:"The outage lasted forty minutes and affected two production accounts.",tr:"本次中断持续了四十分钟，影响两个生产账号。"},
+ {d:12,w:"tedious",pos:"adj.",p:"/ˈtiːdiəs/",cn:"枯燥乏味的、磨人的",k:"tedious",ex:"Checking each server by hand is tedious and error-prone.",tr:"逐台手工检查服务器既枯燥又容易出错。"},
+ {d:12,w:"grippy",pos:"adj.",p:"/ˈɡrɪpi/",cn:"抓地力强的（口语）",k:"grippier",ex:"The new tyres are noticeably grippier once they're up to temperature.",tr:"新轮胎热起来之后抓地力明显更强。"},
+ {d:12,w:"muddled",pos:"adj.",p:"/ˈmʌdld/",cn:"混乱不清的、糊成一团的",k:"muddled",ex:"If you over-extract, the flavours get muddled and flat.",tr:"萃取过头的话，风味会糊成一团、变得平淡。"},
+ {d:12,w:"windfall",pos:"n.",p:"/ˈwɪndfɔːl/",cn:"意外之财、飞来横财",k:"windfall",ex:"I put most of the bonus windfall into the index fund rather than spending it.",tr:"这笔意外的奖金我大部分投进了指数基金，没花掉。"},
+ {d:12,w:"touch and go",pos:"phr.",p:"/tʌtʃ ənd ɡəʊ/",cn:"悬乎、说不准能不能成",k:"touch and go",ex:"It was touch and go whether we'd finish before the window closed.",tr:"能不能在窗口关闭前做完，当时挺悬的。"},
+ {d:12,w:"back to square one",pos:"phr.",p:"/bæk tə skweə wʌn/",cn:"回到原点、白忙一场",k:"back to square one",ex:"The rollback failed too, so we're back to square one.",tr:"回滚也失败了，我们又回到了原点。"},
+ {d:12,w:"buy time",pos:"phr.",p:"/baɪ taɪm/",cn:"争取时间、拖一拖",k:"buys us time",ex:"Restarting the service buys us time until the vendor patch arrives.",tr:"重启服务能争取一点时间，撑到厂商补丁下来。"},
+ {d:12,w:"be up in the air",pos:"phr.",p:"/ʌp ɪn ði eə/",cn:"还没定、悬而未决",k:"up in the air",ex:"The October travel dates are still up in the air.",tr:"十月的出行日期还没定下来。"},
+
+ {d:13,w:"substantiate",pos:"v.",p:"/səbˈstænʃieɪt/",cn:"用证据支持、证实（说法）",k:"substantiate",ex:"We couldn't substantiate the claim that the agent had run successfully.",tr:"我们无法证实「该 agent 已成功运行」这一说法。"},
+ {d:13,w:"pertinent",pos:"adj.",p:"/ˈpɜːtɪnənt/",cn:"切题的、相关的（比 relevant 正式）",k:"pertinent",ex:"I've attached the pertinent CloudTrail entries for your review.",tr:"我已附上相关的 CloudTrail 记录供你查阅。"},
+ {d:13,w:"transient",pos:"adj.",p:"/ˈtrænziənt/",cn:"短暂的、出现一次就消失的",k:"transient",ex:"The error was transient and hasn't reappeared since the restart.",tr:"该错误是短暂性的，重启后再未出现。"},
+ {d:13,w:"forgiving",pos:"adj.",p:"/fəˈɡɪvɪŋ/",cn:"容错性好的、不惩罚失误的",k:"forgiving",ex:"A wider power band makes the car more forgiving when you get the gear wrong.",tr:"更宽的动力带让这台车在你挡位选错时更宽容。"},
+ {d:13,w:"decadent",pos:"adj.",p:"/ˈdekədənt/",cn:"（食物）浓郁奢华的、罪恶的美味",k:"decadent",ex:"That flat white with a slice of basque cheesecake felt decadent.",tr:"那杯 flat white 配一块巴斯克蛋糕，简直是罪恶的享受。"},
+ {d:13,w:"dip",pos:"n. / v.",p:"/dɪp/",cn:"回落、小幅下跌；蘸",k:"the dip",ex:"I usually buy the dip rather than trying to time the top.",tr:"我一般是逢跌买入，而不是去猜顶部。"},
+ {d:13,w:"on second thought",pos:"phr.",p:"/ɒn ˈsekənd θɔːt/",cn:"再想想的话、转念一想",k:"On second thought",ex:"On second thought, let's do the reboot during the weekend window instead.",tr:"再想想的话，我们还是改到周末的窗口做重启吧。"},
+ {d:13,w:"stay on top of something",pos:"phr.",p:"/steɪ ɒn tɒp əv/",cn:"持续盯住、掌控住某事",k:"stay on top of",ex:"I'll stay on top of the ticket queue while you're on leave.",tr:"你休假期间，工单队列我会一直盯着。"},
+ {d:13,w:"a heads-up call",pos:"phr.",p:"/ə ˈhedz ʌp kɔːl/",cn:"预警式的沟通、提前打的招呼",k:"a heads-up call",ex:"Consider this a heads-up call — the vendor may miss the deadline.",tr:"就当我提前给你打个招呼：厂商可能赶不上截止日期。"},
+ {d:13,w:"go the extra mile",pos:"phr.",p:"/ɡəʊ ði ˈekstrə maɪl/",cn:"多做一步、格外用心",k:"went the extra mile",ex:"The night shift went the extra mile and rebuilt the node before handover.",tr:"夜班同事额外多做了一步，在交接前把节点重建好了。"},
+
+ {d:14,w:"discrete",pos:"adj.",p:"/dɪˈskriːt/",cn:"独立分开的、离散的（≠discreet 谨慎）",k:"discrete",ex:"We split the rollout into three discrete phases so each can be verified.",tr:"我们把上线拆成三个独立的阶段，每一阶段都能单独验证。"},
+ {d:14,w:"antiquated",pos:"adj.",p:"/ˈæntɪkweɪtɪd/",cn:"陈旧过时的（该淘汰了）",k:"antiquated",ex:"The monitoring stack is antiquated and barely maintained anymore.",tr:"这套监控系统已经很陈旧，几乎没人再维护了。"},
+ {d:14,w:"leeway",pos:"n.",p:"/ˈliːweɪ/",cn:"回旋余地、宽松空间",k:"leeway",ex:"The deadline gives us very little leeway if the first attempt fails.",tr:"如果第一次尝试失败，这个截止日期留给我们的余地非常有限。"},
+ {d:14,w:"telegraph",pos:"v.",p:"/ˈtelɪɡrɑːf/",cn:"（提前）传递出信号、预告",k:"telegraph",ex:"Good tyres telegraph the limit before they let go.",tr:"好轮胎会在失去抓地之前把极限信号传递给你。"},
+ {d:14,w:"potent",pos:"adj.",p:"/ˈpəʊtnt/",cn:"（效力）强劲的、后劲足的",k:"potent",ex:"A double ristretto is small but surprisingly potent.",tr:"双份 ristretto 分量虽小，后劲却出奇地足。"},
+ {d:14,w:"forfeit",pos:"v. / n.",p:"/ˈfɔːfɪt/",cn:"（因故）丧失、放弃（权利或钱）",k:"forfeit",ex:"If you cancel within 48 hours, you forfeit the full booking fee.",tr:"如果在 48 小时内取消，你将损失全部预订费用。"},
+ {d:14,w:"take it from here",pos:"phr.",p:"/teɪk ɪt frəm hɪə/",cn:"接下来交给你了、由你接手",k:"take it from here",ex:"The node is back online — the day shift can take it from here.",tr:"节点已恢复上线，接下来交给白班同事。"},
+ {d:14,w:"give or take",pos:"phr.",p:"/ɡɪv ɔː teɪk/",cn:"上下浮动、差不多（估数用）",k:"give or take",ex:"The rollback takes about half an hour, give or take.",tr:"回滚大概要半小时上下。"},
+ {d:14,w:"be all over the place",pos:"phr.",p:"/ɔːl əʊvə ðə pleɪs/",cn:"乱七八糟、毫无章法",k:"all over the place",ex:"The latency numbers were all over the place last night.",tr:"昨晚的延迟数据乱七八糟，毫无规律。"},
+ {d:14,w:"nail something down",pos:"phr. v.",p:"/neɪl ˈsʌmθɪŋ daʊn/",cn:"敲定、确定下来",k:"nail down",ex:"Let's nail down the maintenance date before we notify the users.",tr:"通知用户之前，我们先把维护日期敲定。"},
+
+ {d:15,w:"attribute",pos:"v.",p:"/əˈtrɪbjuːt/",cn:"归因于（attribute A to B）",k:"attribute",ex:"We attribute the failure to a race condition in the patching script.",tr:"我们将此次故障归因于打补丁脚本中的竞态条件。"},
+ {d:15,w:"corroborate",pos:"v.",p:"/kəˈrɒbəreɪt/",cn:"（用另一来源）佐证、印证",k:"corroborate",ex:"The vendor's logs corroborate what we saw in CloudTrail.",tr:"厂商的日志印证了我们在 CloudTrail 里看到的情况。"},
+ {d:15,w:"marginal",pos:"adj.",p:"/ˈmɑːdʒɪnl/",cn:"微小的、边际的；勉强的",k:"marginal",ex:"The tuning change gave only a marginal improvement in latency.",tr:"这次调参对延迟的改善非常有限。"},
+ {d:15,w:"abrupt",pos:"adj.",p:"/əˈbrʌpt/",cn:"突兀的、生硬的（≠progressive）",k:"abrupt",ex:"The throttle response feels abrupt in Sport Sharp mode.",tr:"在 Sport Sharp 模式下，油门响应显得有些突兀。"},
+ {d:15,w:"pungent",pos:"adj.",p:"/ˈpʌndʒənt/",cn:"气味刺鼻浓烈的（偏负面）",k:"pungent",ex:"Over-roasted beans give off a pungent, ashy smell.",tr:"烘过头的豆子会散发出刺鼻的焦灰味。"},
+ {d:15,w:"hedge",pos:"v. / n.",p:"/hedʒ/",cn:"对冲、留后手；说话打太极",k:"hedges",ex:"Holding some bonds hedges against a sharp drawdown in equities.",tr:"持有一部分债券可以对冲股票大幅回撤的风险。"},
+ {d:15,w:"wrap one's head around something",pos:"phr.",p:"/ræp əˈraʊnd/",cn:"想明白、理解透（有难度的东西）",k:"wrap my head around",ex:"It took me a while to wrap my head around how IRSA actually works.",tr:"我花了好一阵才想明白 IRSA 到底是怎么运作的。"},
+ {d:15,w:"in the loop",pos:"phr.",p:"/ɪn ðə luːp/",cn:"知情、在信息圈里",k:"in the loop",ex:"Please keep me in the loop on any vendor updates.",tr:"厂商那边有任何进展，请让我保持知情。"},
+ {d:15,w:"come up short",pos:"phr.",p:"/kʌm ʌp ʃɔːt/",cn:"没达标、差了一截",k:"came up short",ex:"The first fix came up short — the errors returned within an hour.",tr:"第一次修复没能奏效，一小时内错误又回来了。"},
+ {d:15,w:"by and large",pos:"phr.",p:"/baɪ ənd lɑːdʒ/",cn:"总体而言、大体上",k:"By and large",ex:"By and large, the migration went smoothly apart from two nodes.",tr:"总体而言，除了两个节点之外，这次迁移进行得很顺利。"},
+
+ {d:16,w:"mitigation",pos:"n.",p:"/ˌmɪtɪˈɡeɪʃn/",cn:"缓解措施（降低影响，非根治）",k:"mitigation",ex:"As a mitigation, we scaled out the node group before the peak window.",tr:"作为缓解措施，我们在高峰窗口前对节点组做了扩容。"},
+ {d:16,w:"prerequisite",pos:"n.",p:"/ˌpriːˈrekwəzɪt/",cn:"前置条件、先决要求",k:"prerequisite",ex:"The CSI snapshot controller is a prerequisite for cross-account backups.",tr:"CSI 快照控制器是跨账号备份的前置条件。"},
+ {d:16,w:"ambiguous",pos:"adj.",p:"/æmˈbɪɡjuəs/",cn:"含糊不清的、有歧义的",k:"ambiguous",ex:"The error message was ambiguous, so we had to check the raw stdout.",tr:"报错信息含糊不清，我们只好去查原始的 stdout 输出。"},
+ {d:16,w:"chuck",pos:"v.",p:"/tʃʌk/",cn:"随手一扔；扔掉（澳洲口语）",k:"chuck",ex:"Just chuck your bags in the boot and we'll head off.",tr:"把包随手扔后备箱就行，我们出发吧。"},
+ {d:16,w:"knackered",pos:"adj.",p:"/ˈnækəd/",cn:"累瘫了（英澳）；零件报废了",k:"knackered",ex:"After a full day of driving we were absolutely knackered.",tr:"开了一整天车，我们累得不行。"},
+ {d:16,w:"sturdy",pos:"adj.",p:"/ˈstɜːdi/",cn:"结实耐用的、扎实的",k:"sturdy",ex:"Pack a sturdy pair of shoes for the walks in Tasmania.",tr:"去塔斯马尼亚徒步，带一双结实的鞋。"},
+ {d:16,w:"no worries",pos:"phr.",p:"/nəʊ ˈwʌriz/",cn:"没事、不用谢（澳洲国民短语）",k:"No worries",ex:"Sorry I'm late. — No worries, mate.",tr:"抱歉我迟到了。——没事儿。"},
+ {d:16,w:"how are you going",pos:"phr.",p:"/haʊ ə juː ˈɡəʊɪŋ/",cn:"最近怎么样（澳式问候，非问交通）",k:"How are you going",ex:"How are you going? Settling into Melbourne alright?",tr:"最近怎么样？在墨尔本还适应吗？"},
+ {d:16,w:"give someone a hand",pos:"phr.",p:"/ɡɪv ə hænd/",cn:"搭把手、帮个忙",k:"give me a hand",ex:"Could you give me a hand with the handover notes?",tr:"能帮我一起弄一下交接文档吗？"},
+ {d:16,w:"sort something out",pos:"phr. v.",p:"/sɔːt aʊt/",cn:"搞定、处理妥当（英澳口语）",k:"sort out",ex:"I'll sort out the SIM card once we land in Brisbane.",tr:"落地布里斯班之后我把电话卡搞定。"},
+
+ {d:17,w:"escalate",pos:"v.",p:"/ˈeskəleɪt/",cn:"升级上报；（事态）恶化",k:"escalate",ex:"If there's no response within an hour, escalate it to the on-call manager.",tr:"如果一小时内没有响应，就上报给值班经理。"},
+ {d:17,w:"consolidate",pos:"v.",p:"/kənˈsɒlɪdeɪt/",cn:"整合归并（成一个）",k:"consolidated",ex:"We consolidated four monitoring dashboards into a single view.",tr:"我们把四个监控面板整合成了一个视图。"},
+ {d:17,w:"latent",pos:"adj.",p:"/ˈleɪtnt/",cn:"潜伏的、尚未显现的（≠latency）",k:"latent",ex:"The bug had been latent for months before the upgrade exposed it.",tr:"这个 bug 潜伏了好几个月，直到升级才把它暴露出来。"},
+ {d:17,w:"scenic",pos:"adj.",p:"/ˈsiːnɪk/",cn:"风景优美的（路线/观景点）",k:"scenic",ex:"Take the scenic route along the coast rather than the highway.",tr:"走沿海的景观路线，别走高速。"},
+ {d:17,w:"rugged",pos:"adj.",p:"/ˈrʌɡɪd/",cn:"崎岖粗犷的；耐造的（读 RUG-gid）",k:"rugged",ex:"Tasmania's west coast is wild and rugged.",tr:"塔斯马尼亚的西海岸荒野而崎岖。"},
+ {d:17,w:"brisk",pos:"adj.",p:"/brɪsk/",cn:"（天气）清冽微寒的",k:"brisk",ex:"Mornings in Hobart can be brisk even in spring.",tr:"即使在春天，霍巴特的早晨也可能相当清冽。"},
+ {d:17,w:"grab a bite",pos:"phr.",p:"/ɡræb ə baɪt/",cn:"随便吃点东西",k:"grab a bite",ex:"We've got two hours — want to grab a bite?",tr:"我们还有两个小时，去随便吃点？"},
+ {d:17,w:"pop in",pos:"phr. v.",p:"/pɒp ɪn/",cn:"顺路进去一下、短暂造访",k:"pop in",ex:"Let's pop in for a coffee before the museum opens.",tr:"趁博物馆还没开门，我们进去喝杯咖啡。"},
+ {d:17,w:"be worth it",pos:"phr.",p:"/wɜːθ ɪt/",cn:"值得（花这个时间或钱）",k:"worth it",ex:"The two-hour drive was long, but the view was worth it.",tr:"两小时车程是久了点，但那个景色值了。"},
+ {d:17,w:"first thing tomorrow",pos:"phr.",p:"/fɜːst θɪŋ təˈmɒrəʊ/",cn:"明天一早（第一件事就办）",k:"first thing tomorrow",ex:"I'll send the RCA draft first thing tomorrow.",tr:"我明天一早就把 RCA 初稿发出去。"},
+
+ {d:18,w:"contingent",pos:"adj.",p:"/kənˈtɪndʒənt/",cn:"取决于…的（contingent on）",k:"contingent",ex:"The go-live date is contingent on the security review passing.",tr:"上线日期取决于安全评审能否通过。"},
+ {d:18,w:"revert",pos:"v.",p:"/rɪˈvɜːt/",cn:"恢复原状、回退（≠回复邮件）",k:"revert",ex:"If the metrics don't improve, we'll revert to the previous config.",tr:"如果指标没有改善，我们就回退到之前的配置。"},
+ {d:18,w:"discern",pos:"v.",p:"/dɪˈsɜːn/",cn:"辨别出、看出（细微差别）",k:"discern",ex:"It's hard to discern any pattern from the logs alone.",tr:"仅凭日志很难辨别出任何规律。"},
+ {d:18,w:"twitchy",pos:"adj.",p:"/ˈtwɪtʃi/",cn:"（转向）过于敏感神经质的（≠nimble）",k:"twitchy",ex:"Too little caster makes the steering feel twitchy on the highway.",tr:"主销后倾角太小会让高速上的转向显得过于神经质。"},
+ {d:18,w:"tepid",pos:"adj.",p:"/ˈtepɪd/",cn:"温吞的；反应冷淡的",k:"tepid",ex:"Serve it right away — a flat white goes tepid fast.",tr:"要马上喝，flat white 很快就变温吞了。"},
+ {d:18,w:"frugal",pos:"adj.",p:"/ˈfruːɡl/",cn:"节俭的（褒义，≠stingy 抠门）",k:"frugal",ex:"Being frugal in your thirties is what makes compounding work.",tr:"三十几岁时的节俭，正是复利发挥作用的前提。"},
+ {d:18,w:"across the board",pos:"phr.",p:"/əˈkrɒs ðə bɔːd/",cn:"全面地、所有方面都",k:"across the board",ex:"We saw improvements across the board after the kernel upgrade.",tr:"内核升级之后，各项指标全面改善。"},
+ {d:18,w:"in a nutshell",pos:"phr.",p:"/ɪn ə ˈnʌtʃel/",cn:"简而言之、一句话概括",k:"In a nutshell",ex:"In a nutshell, the agent was reporting success while doing nothing.",tr:"简而言之，那个 agent 什么都没做却在上报成功。"},
+ {d:18,w:"keep an eye on something",pos:"phr.",p:"/kiːp ən aɪ ɒn/",cn:"留意盯着（被动观察）",k:"Keep an eye on",ex:"Keep an eye on the disk usage over the weekend.",tr:"周末留意一下磁盘使用率。"},
+ {d:18,w:"more often than not",pos:"phr.",p:"/mɔːr ˈɒfn ðən nɒt/",cn:"多数情况下、往往",k:"More often than not",ex:"More often than not, the alert clears itself within minutes.",tr:"多数情况下，这个告警几分钟内会自行恢复。"},
+
+ {d:19,tag:"bad",w:"rally",pos:"n. / v.",p:"/ˈræli/",cn:"多拍回合；（市场）反弹回升",k:"rally",ex:"That rally must have lasted forty shots.",tr:"那个回合肯定打了四十拍。"},
+ {d:19,tag:"bad",w:"lunge",pos:"v. / n.",p:"/lʌndʒ/",cn:"跨步扑救、弓步上网",k:"lunged",ex:"He lunged forward to scoop up the net shot.",tr:"他跨步向前把网前球挑了起来。"},
+ {d:19,tag:"bad",w:"deceptive",pos:"adj.",p:"/dɪˈseptɪv/",cn:"有欺骗性的（假动作）",k:"deceptive",ex:"Her forehand is deceptive — the smash and the drop look identical.",tr:"她的正手很有欺骗性，杀球和吊球的动作一模一样。"},
+ {d:19,tag:"bad",w:"stamina",pos:"n.",p:"/ˈstæmɪnə/",cn:"耐力、体能储备",k:"stamina",ex:"Three games in, it comes down to stamina rather than technique.",tr:"打到第三局，拼的就是耐力而不是技术了。"},
+ {d:19,tag:"bad",w:"agility",pos:"n.",p:"/əˈdʒɪləti/",cn:"敏捷性（形容词 agile /ˈædʒaɪl/）",k:"agility",ex:"Footwork drills build agility more than raw speed does.",tr:"步法练习对敏捷性的提升比单纯练速度更明显。"},
+ {d:19,tag:"bad",w:"flick",pos:"n. / v.",p:"/flɪk/",cn:"抖腕轻弹（偷发后场、挑球）",k:"flick",ex:"A flick serve works well if your opponent stands too close.",tr:"如果对手站得太靠前，偷发一个后场球很有效。"},
+ {d:19,tag:"bad",w:"unforced error",pos:"phr.",p:"/ʌnˈfɔːst ˈerə/",cn:"非受迫失误（自己送的分）",k:"unforced errors",ex:"I lost that game on unforced errors, not on his attack.",tr:"那一局我是输在自己的非受迫失误，而不是他的进攻。"},
+ {d:19,tag:"bad",w:"have the edge over someone",pos:"phr.",p:"/hæv ði edʒ/",cn:"略占优势、稍胜一筹",k:"has the edge over",ex:"He has the edge over me at the net, but I'm better at the back.",tr:"网前他比我强一点，但后场我更好。"},
+ {d:19,tag:"bad",w:"hold one's own",pos:"phr.",p:"/həʊld wʌnz əʊn/",cn:"撑得住、不落下风",k:"held my own",ex:"I held my own against a much stronger player.",tr:"面对实力强得多的对手，我也没落下风。"},
+ {d:19,tag:"bad",w:"be off one's game",pos:"phr.",p:"/ɒf wʌnz ɡeɪm/",cn:"状态不佳（反义 on my game）",k:"off my game",ex:"I was completely off my game last night.",tr:"昨晚我状态完全不在。"},
+
+ {d:20,tag:"au",w:"marsupial",pos:"n.",p:"/mɑːˈsuːpiəl/",cn:"有袋动物",k:"marsupials",ex:"Wombats are marsupials, despite looking nothing like kangaroos.",tr:"袋熊也是有袋动物，尽管长得跟袋鼠毫不相像。"},
+ {d:20,tag:"au",w:"nocturnal",pos:"adj.",p:"/nɒkˈtɜːnl/",cn:"夜行性的",k:"nocturnal",ex:"Most Australian marsupials are nocturnal, so dusk is the best time to spot them.",tr:"澳洲多数有袋动物都是夜行性的，所以黄昏是最好的观察时段。"},
+ {d:20,tag:"au",w:"elusive",pos:"adj.",p:"/ɪˈluːsɪv/",cn:"难得一见的、难以捉摸的",k:"elusive",ex:"The platypus is famously elusive — you need patience and a quiet creek.",tr:"鸭嘴兽出了名的难得一见，需要耐心和一条安静的溪流。"},
+ {d:20,tag:"au",w:"venomous",pos:"adj.",p:"/ˈvenəməs/",cn:"有毒的（咬你注毒；≠poisonous 吃了中毒）",k:"venomous",ex:"Australia has plenty of venomous snakes, but bites are rare.",tr:"澳洲有很多毒蛇，但真正被咬的情况其实很少见。"},
+ {d:20,tag:"au",w:"endemic",pos:"adj.",p:"/enˈdemɪk/",cn:"某地特有的、只在此处有的",k:"endemic",ex:"The Tasmanian devil is endemic to Tasmania.",tr:"袋獾是塔斯马尼亚特有的物种。"},
+ {d:20,tag:"au",w:"burrow",pos:"n. / v.",p:"/ˈbʌrəʊ/",cn:"洞穴；挖洞",k:"burrows",ex:"Wombats dig enormous burrows that can run for tens of metres.",tr:"袋熊会挖出巨大的洞穴，长度可达数十米。"},
+ {d:20,tag:"au",w:"in the wild",pos:"phr.",p:"/ɪn ðə waɪld/",cn:"在野外（非圈养状态）",k:"in the wild",ex:"Seeing a koala in the wild is much harder than at a sanctuary.",tr:"在野外看到考拉，比在保护区里难得多。"},
+ {d:20,tag:"au",w:"be on the lookout for",pos:"phr.",p:"/ɒn ðə ˈlʊkaʊt fɔː/",cn:"留意寻找、警惕着",k:"on the lookout for",ex:"Be on the lookout for kangaroos on the road around dusk.",tr:"黄昏前后开车，要留意路上的袋鼠。"},
+ {d:20,tag:"au",w:"give something a wide berth",pos:"phr.",p:"/ə waɪd bɜːθ/",cn:"远远绕开、敬而远之",k:"a wide berth",ex:"If you see a snake on the track, just give it a wide berth.",tr:"如果在小路上看到蛇，远远绕开就行。"},
+ {d:20,tag:"au",w:"in the middle of nowhere",pos:"phr.",p:"/ɪn ðə ˈmɪdl əv ˈnəʊweə/",cn:"荒郊野外、前不着村后不着店",k:"in the middle of nowhere",ex:"We ran low on fuel in the middle of nowhere.",tr:"我们在前不着村后不着店的地方快没油了。"},
+
+ {d:21,tag:"au",w:"swoop",pos:"v. / n.",p:"/swuːp/",cn:"（鸟）俯冲攻击",k:"swoop",ex:"Magpies swoop cyclists during nesting season.",tr:"筑巢季节里，喜鹊会俯冲攻击骑车的人。"},
+ {d:21,tag:"au",w:"feral",pos:"adj.",p:"/ˈferəl/",cn:"野化的（原本家养；≠wild 天生野生）",k:"Feral",ex:"Feral cats are a serious threat to native wildlife.",tr:"野化的家猫对本土野生动物构成严重威胁。"},
+ {d:21,tag:"au",w:"placid",pos:"adj.",p:"/ˈplæsɪd/",cn:"温和平静的（性情或水面）",k:"placid",ex:"Koalas look placid, but they can be surprisingly grumpy.",tr:"考拉看着温顺，其实脾气可能出奇地差。"},
+ {d:21,tag:"au",w:"sanctuary",pos:"n.",p:"/ˈsæŋktʃuəri/",cn:"野生动物保护区；庇护所",k:"sanctuary",ex:"The sanctuary rehabilitates injured wildlife before releasing them.",tr:"这家保护区会先让受伤的野生动物康复，再放归自然。"},
+ {d:21,tag:"bad",w:"reflexes",pos:"n. pl.",p:"/ˈriːfleksɪz/",cn:"反应神经（单数 reflex）",k:"reflexes",ex:"Doubles at the net is all about reflexes.",tr:"双打网前拼的全是反应速度。"},
+ {d:21,tag:"bad",w:"relentless",pos:"adj.",p:"/rɪˈlentləs/",cn:"不间断的、不留情面的",k:"relentless",ex:"His attack was relentless — I never got a chance to settle.",tr:"他的进攻毫不留情，我根本没机会站稳节奏。"},
+ {d:21,tag:"bad",w:"get the hang of something",pos:"phr.",p:"/ɡet ðə hæŋ əv/",cn:"掌握窍门、终于上手",k:"get the hang of",ex:"It took me a season to get the hang of the backhand clear.",tr:"我花了一整个赛季才掌握反手高远球的窍门。"},
+ {d:21,w:"on the fly",pos:"phr.",p:"/ɒn ðə flaɪ/",cn:"临场调整、边做边改",k:"on the fly",ex:"We changed tactics on the fly after losing the first game.",tr:"输掉第一局后，我们临场调整了战术。"},
+ {d:21,tag:"au",w:"be in for something",pos:"phr.",p:"/biː ɪn fɔː/",cn:"即将面临、少不了要遇上",k:"in for",ex:"If you're driving to Cairns in February, you're in for some rain.",tr:"二月开车去凯恩斯的话，少不了要遇上雨。"},
+ {d:21,tag:"bad",w:"be no match for someone",pos:"phr.",p:"/nəʊ mætʃ fɔː/",cn:"完全不是对手",k:"no match for",ex:"My smash is no match for his, so I play the long game.",tr:"我的杀球完全比不过他，所以我打拉吊消耗。"},
+
+ {d:22,w:"fluctuate",pos:"v.",p:"/ˈflʌktʃueɪt/",cn:"波动起伏（正在上下动）",k:"fluctuates",ex:"Memory usage fluctuates between forty and eighty percent all day.",tr:"内存占用一整天都在四成到八成之间波动。"},
+ {d:22,w:"obsolete",pos:"adj.",p:"/ˈɒbsəliːt/",cn:"已淘汰的、彻底没人用的",k:"obsolete",ex:"That TLS version is obsolete and will be blocked next quarter.",tr:"那个 TLS 版本已经淘汰，下季度会被直接封禁。"},
+ {d:22,w:"proximity",pos:"n.",p:"/prɒkˈsɪməti/",cn:"邻近、距离上的接近",k:"proximity",ex:"We chose the hotel for its proximity to the airport.",tr:"我们选这家酒店是因为离机场近。"},
+ {d:22,w:"parched",pos:"adj.",p:"/pɑːtʃt/",cn:"渴得要命；（土地）干裂的",k:"parched",ex:"After two sets I was absolutely parched.",tr:"打完两局我渴得不行。"},
+ {d:22,w:"hefty",pos:"adj.",p:"/ˈhefti/",cn:"沉重的；（金额）数目可观的",k:"hefty",ex:"Changing the flight came with a hefty fee.",tr:"改签航班要付一笔不小的费用。"},
+ {d:22,w:"dwindle",pos:"v.",p:"/ˈdwɪndl/",cn:"逐渐减少、慢慢缩水",k:"dwindled",ex:"Our remaining IP addresses dwindled to fewer than twenty.",tr:"我们剩余的 IP 地址逐渐减少到不足二十个。"},
+ {d:22,w:"run its course",pos:"phr.",p:"/rʌn ɪts kɔːs/",cn:"自行发展完、走完过程",k:"run its course",ex:"We let the retry loop run its course rather than killing the job.",tr:"我们让重试循环自己走完，而不是直接杀掉任务。"},
+ {d:22,w:"at a glance",pos:"phr.",p:"/ət ə ɡlɑːns/",cn:"一眼就能看出、一目了然",k:"at a glance",ex:"The new dashboard shows cluster health at a glance.",tr:"新面板可以让你一眼看出集群健康状况。"},
+ {d:22,w:"bank on something",pos:"phr. v.",p:"/bæŋk ɒn/",cn:"指望、把把握押在某事上",k:"bank on",ex:"Don't bank on the vendor patch arriving before Friday.",tr:"别指望厂商的补丁能在周五前到。"},
+ {d:22,w:"in the long run",pos:"phr.",p:"/ɪn ðə lɒŋ rʌn/",cn:"从长远来看",k:"in the long run",ex:"Index funds win in the long run, even if they feel boring now.",tr:"从长远来看指数基金会赢，即便现在觉得无聊。"},
+
+ {d:23,w:"deteriorate",pos:"v.",p:"/dɪˈtɪəriəreɪt/",cn:"恶化、每况愈下（五个音节）",k:"deteriorated",ex:"Network latency deteriorated steadily over the weekend.",tr:"整个周末网络延迟持续恶化。"},
+ {d:23,w:"viable",pos:"adj.",p:"/ˈvaɪəbl/",cn:"可行的、实际能落地的",k:"viable",ex:"Rolling back is the only viable option at this point.",tr:"到这一步，回滚是唯一可行的方案。"},
+ {d:23,w:"threshold",pos:"n.",p:"/ˈθreʃhəʊld/",cn:"阈值、临界点；门槛",k:"threshold",ex:"The alert fires once CPU crosses the eighty percent threshold.",tr:"CPU 超过 80% 阈值后就会触发告警。"},
+ {d:23,w:"brittle",pos:"adj.",p:"/ˈbrɪtl/",cn:"脆的、一碰就崩的（系统或材料）",k:"brittle",ex:"The deployment script is brittle — any change to the path breaks it.",tr:"这个部署脚本很脆，路径一改就崩。"},
+ {d:23,w:"humid",pos:"adj.",p:"/ˈhjuːmɪd/",cn:"潮湿闷热的",k:"humid",ex:"Cairns gets seriously humid in the wet season.",tr:"雨季的凯恩斯会闷热得厉害。"},
+ {d:23,w:"sparse",pos:"adj.",p:"/spɑːs/",cn:"稀疏的、稀少的",k:"sparse",ex:"Traffic gets sparse once you're past the last town.",tr:"过了最后一个镇子，路上车就很少了。"},
+ {d:23,w:"pull it off",pos:"phr.",p:"/pʊl ɪt ɒf/",cn:"（有难度地）成功做成",k:"pulled it off",ex:"Finishing the migration in one window was ambitious, but we pulled it off.",tr:"一个窗口内完成迁移挺激进的，但我们做成了。"},
+ {d:23,w:"the bottom line",pos:"phr.",p:"/ðə ˈbɒtəm laɪn/",cn:"关键结论、说到底",k:"The bottom line",ex:"The bottom line is that we need a second maintenance window.",tr:"结论是，我们还需要第二个维护窗口。"},
+ {d:23,w:"down the line",pos:"phr.",p:"/daʊn ðə laɪn/",cn:"以后、将来某个时候",k:"down the line",ex:"We can revisit the architecture further down the line.",tr:"架构的事我们可以以后再回过头来看。"},
+ {d:23,w:"from scratch",pos:"phr.",p:"/frəm skrætʃ/",cn:"从零开始、从头做起",k:"from scratch",ex:"It was faster to rebuild the node from scratch than to debug it.",tr:"把节点从零重建比慢慢排查更快。"},
+
+ {d:24,w:"concede",pos:"v.",p:"/kənˈsiːd/",cn:"承认（对方对）；让掉一局",k:"concede",ex:"I'll concede that the vendor's explanation makes sense.",tr:"我承认厂商的解释是说得通的。"},
+ {d:24,w:"stipulate",pos:"v.",p:"/ˈstɪpjuleɪt/",cn:"（合同或规定）明确规定",k:"stipulates",ex:"The SLA stipulates a four-hour response time for P1 incidents.",tr:"服务协议明确规定 P1 故障需在四小时内响应。"},
+ {d:24,w:"incremental",pos:"adj.",p:"/ˌɪŋkrəˈmentl/",cn:"逐步递增的、小步推进的",k:"incremental",ex:"We took an incremental approach rather than a big-bang cutover.",tr:"我们采取逐步推进的方式，而不是一次性切换。"},
+ {d:24,w:"pristine",pos:"adj.",p:"/ˈprɪstiːn/",cn:"原始未受破坏的；崭新如初的",k:"pristine",ex:"Tasmania still has genuinely pristine wilderness.",tr:"塔斯马尼亚仍保有真正原始未被破坏的荒野。"},
+ {d:24,w:"cramped",pos:"adj.",p:"/kræmpt/",cn:"狭窄局促的（≠cramp 抽筋）",k:"cramped",ex:"The economy seats were cramped on the twelve-hour leg.",tr:"十二小时那一程的经济舱座位非常局促。"},
+ {d:24,w:"brew",pos:"v. / n.",p:"/bruː/",cn:"冲煮；（麻烦）正在酝酿",k:"brew",ex:"Let it brew for four minutes before you press down.",tr:"按下压杆前先让它浸泡四分钟。"},
+ {d:24,w:"err on the side of caution",pos:"phr.",p:"/ɜːr ɒn ðə saɪd/",cn:"宁可谨慎一点、保守起见",k:"err on the side of caution",ex:"Let's err on the side of caution and schedule a rollback window.",tr:"保守起见，我们还是预留一个回滚窗口吧。"},
+ {d:24,w:"a rough idea",pos:"phr.",p:"/ə rʌf aɪˈdɪə/",cn:"大致的概念、粗略了解",k:"a rough idea",ex:"Can you give me a rough idea of the blast radius?",tr:"能大致说一下影响范围有多大吗？"},
+ {d:24,w:"stand to reason",pos:"phr.",p:"/stænd tə ˈriːzn/",cn:"合乎情理、想想也知道",k:"stands to reason",ex:"It stands to reason that a bigger node pool would ease the pressure.",tr:"想想也知道，节点池更大一些自然能缓解压力。"},
+ {d:24,w:"off the hook",pos:"phr.",p:"/ɒf ðə hʊk/",cn:"脱身、不用担责了",k:"off the hook",ex:"The vendor confirmed it was their bug, so we're off the hook.",tr:"厂商确认是他们的 bug，所以我们脱责了。"},
+
+ {d:25,w:"anomaly",pos:"n.",p:"/əˈnɒməli/",cn:"异常现象、反常数据点",k:"anomaly",ex:"The spike looked like an anomaly until it happened again on Thursday.",tr:"那个尖峰本来像是个异常点，直到周四又出现了一次。"},
+ {d:25,w:"supersede",pos:"v.",p:"/ˌsuːpəˈsiːd/",cn:"取代、替代（拼 -sede 不是 -cede）",k:"supersedes",ex:"This runbook supersedes the version from last March.",tr:"本操作手册取代去年三月的版本。"},
+ {d:25,w:"rigorous",pos:"adj.",p:"/ˈrɪɡərəs/",cn:"严格缜密的（测试或流程）",k:"rigorous",ex:"The change passed a rigorous review before it reached production.",tr:"该变更在进入生产前通过了严格的评审。"},
+ {d:25,w:"hollow",pos:"adj.",p:"/ˈhɒləʊ/",cn:"空洞的、中空的；（声音）发闷的",k:"hollow",ex:"The brakes made a hollow sound, which turned out to be worn pads.",tr:"刹车发出一种发闷的声音，后来发现是刹车片磨损了。"},
+ {d:25,w:"sprawling",pos:"adj.",p:"/ˈsprɔːlɪŋ/",cn:"蔓延扩张的、摊得很开的",k:"sprawling",ex:"Melbourne is sprawling, so plan for longer drives than you expect.",tr:"墨尔本摊得很开，行程上要多留些车程时间。"},
+ {d:25,w:"nagging",pos:"adj.",p:"/ˈnæɡɪŋ/",cn:"挥之不去的、隐隐作痛的",k:"nagging",ex:"I had a nagging feeling we'd missed something in the checklist.",tr:"我一直有种挥之不去的感觉，checklist 上漏了什么。"},
+ {d:25,w:"cover for someone",pos:"phr. v.",p:"/ˈkʌvə fɔː/",cn:"替某人顶班、代为处理",k:"cover for me",ex:"Could you cover for me on Friday? I'll take your Monday shift.",tr:"周五能帮我顶个班吗？你周一的班我来上。"},
+ {d:25,w:"be swept under the rug",pos:"phr.",p:"/swept ˈʌndə ðə rʌɡ/",cn:"被掩盖过去、压下不提",k:"swept under the rug",ex:"This near-miss shouldn't be swept under the rug.",tr:"这次险些出事的情况不该被掩盖过去。"},
+ {d:25,w:"have a lot on one's plate",pos:"phr.",p:"/ə lɒt ɒn wʌnz pleɪt/",cn:"手头事情一大堆",k:"a lot on your plate",ex:"I know you've got a lot on your plate, so no rush.",tr:"我知道你手头事情一大堆，所以不急。"},
+ {d:25,w:"split the difference",pos:"phr.",p:"/splɪt ðə ˈdɪfrəns/",cn:"各让一步、折中处理",k:"split the difference",ex:"They wanted Monday, we wanted Friday, so we split the difference.",tr:"他们想周一，我们想周五，最后折中了一下。"},
+
+ {d:26,w:"warrant",pos:"v.",p:"/ˈwɒrənt/",cn:"值得、有必要（做某事）",k:"warrant",ex:"A single failed check doesn't warrant waking up the on-call engineer.",tr:"单次检查失败还不至于把值班工程师叫醒。"},
+ {d:26,w:"nuance",pos:"n.",p:"/ˈnjuːɑːns/",cn:"细微差别、微妙之处（nuanced 的名词）",k:"nuance",ex:"There's a nuance here: the agent reports success even when it skips hosts.",tr:"这里有个微妙之处：即使跳过了主机，agent 也会上报成功。"},
+ {d:26,w:"impede",pos:"v.",p:"/ɪmˈpiːd/",cn:"阻碍、妨碍（拖慢而非挡死）",k:"impeding",ex:"The approval backlog is impeding the whole migration schedule.",tr:"审批积压正在拖慢整个迁移计划。"},
+ {d:26,w:"candid",pos:"adj.",p:"/ˈkændɪd/",cn:"坦率直言的（不回避问题）",k:"candid",ex:"I'd rather have a candid postmortem than a polished one.",tr:"我宁愿要一份坦率的复盘，而不是一份漂亮的。"},
+ {d:26,w:"lush",pos:"adj.",p:"/lʌʃ/",cn:"草木茂盛葱郁的",k:"lush",ex:"The rainforest around Cairns is unbelievably lush.",tr:"凯恩斯周边的雨林葱郁得令人难以置信。"},
+ {d:26,w:"brisk",pos:"adj.",p:"/brɪsk/",cn:"（生意）红火的（第三义项）",k:"brisk",ex:"The café does a brisk trade before nine every morning.",tr:"那家咖啡馆每天九点前生意都很红火。"},
+ {d:26,w:"get to the bottom of something",pos:"phr.",p:"/ðə ˈbɒtəm əv/",cn:"查清根源、弄个水落石出",k:"got to the bottom of",ex:"We still haven't got to the bottom of the intermittent timeouts.",tr:"间歇性超时的根源我们还没查清楚。"},
+ {d:26,w:"hit a snag",pos:"phr.",p:"/hɪt ə snæɡ/",cn:"遇到意外阻碍、卡住了",k:"hit a snag",ex:"We hit a snag halfway through the cutover.",tr:"切换进行到一半时我们遇到了意外阻碍。"},
+ {d:26,w:"on the same wavelength",pos:"phr.",p:"/seɪm ˈweɪvleŋθ/",cn:"想法合拍、很默契（≠on the same page）",k:"on the same wavelength",ex:"My doubles partner and I are on the same wavelength at the net.",tr:"我和双打搭档在网前特别默契。"},
+ {d:26,w:"put something to bed",pos:"phr.",p:"/pʊt tə bed/",cn:"彻底了结、收尾归档",k:"to bed",ex:"Let's put this ticket to bed before the end of the sprint.",tr:"我们在这个 sprint 结束前把这个工单彻底了结。"},
+
+ {d:27,w:"prone",pos:"adj.",p:"/prəʊn/",cn:"易于出问题的（prone to）",k:"prone",ex:"Manual patching is prone to human error, especially at 3 a.m.",tr:"手工打补丁容易出人为失误，尤其是凌晨三点。"},
+ {d:27,w:"segregate",pos:"v.",p:"/ˈseɡrɪɡeɪt/",cn:"隔离分开（网络或环境）",k:"segregate",ex:"We segregate production traffic onto a dedicated subnet.",tr:"我们把生产流量隔离到一个专用子网上。"},
+ {d:27,w:"salvage",pos:"v. / n.",p:"/ˈsælvɪdʒ/",cn:"抢救出来、挽回（部分）",k:"salvage",ex:"We managed to salvage the data from the corrupted volume.",tr:"我们设法从损坏的卷里抢救出了数据。"},
+ {d:27,w:"meticulous",pos:"adj.",p:"/məˈtɪkjələs/",cn:"一丝不苟的、极其细致的",k:"meticulous",ex:"His handover notes are meticulous — nothing gets missed.",tr:"他的交接记录一丝不苟，什么都不会漏。"},
+ {d:27,w:"torrential",pos:"adj.",p:"/təˈrenʃl/",cn:"（雨）倾盆如注的",k:"Torrential",ex:"Torrential rain closed the coastal road for two days.",tr:"倾盆大雨让沿海公路封闭了两天。"},
+ {d:27,w:"knackered",pos:"adj.",p:"/ˈnækəd/",cn:"（零件）磨坏报废了（第二义项）",k:"knackered",ex:"The rear bushings were completely knackered after the track days.",tr:"跑完那几个赛道日，后桥衬套彻底报废了。"},
+ {d:27,w:"take a step back",pos:"phr.",p:"/teɪk ə step bæk/",cn:"退一步想、跳出来看全局",k:"take a step back",ex:"Let's take a step back — are we even solving the right problem?",tr:"我们退一步想想，我们解决的到底是不是对的问题？"},
+ {d:27,w:"par for the course",pos:"phr.",p:"/pɑː fɔː ðə kɔːs/",cn:"意料之中、习以为常了",k:"par for the course",ex:"Vendor delays are par for the course with this product.",tr:"这个产品的厂商延期已经是家常便饭了。"},
+ {d:27,w:"throw someone under the bus",pos:"phr.",p:"/ˈʌndə ðə bʌs/",cn:"甩锅给某人、出卖队友",k:"thrown under the bus",ex:"A blameless postmortem means nobody gets thrown under the bus.",tr:"无责复盘意味着没有人会被甩锅。"},
+ {d:27,w:"a can of worms",pos:"phr.",p:"/ə kæn əv wɜːmz/",cn:"一堆麻烦事、打开就收不住",k:"a real can of worms",ex:"Refactoring that module would open a real can of worms.",tr:"重构那个模块会捅出一大堆麻烦。"},
+
+ {d:28,w:"scrutinise",pos:"v.",p:"/ˈskruːtənaɪz/",cn:"细看审查（美式拼 scrutinize）",k:"scrutinised",ex:"We scrutinised every line of the diff before approving it.",tr:"批准之前，我们逐行审查了那份 diff。"},
+ {d:28,w:"mundane",pos:"adj.",p:"/mʌnˈdeɪn/",cn:"平凡琐碎的、普通不起眼的",k:"mundane",ex:"The root cause turned out to be something mundane — a full disk.",tr:"根因原来是件很平常的事——磁盘满了。"},
+ {d:28,w:"curb",pos:"v. / n.",p:"/kɜːb/",cn:"抑制、控制住（增长或成本）",k:"curb",ex:"We added quotas to curb runaway storage costs.",tr:"我们加了配额来控制失控的存储成本。"},
+ {d:28,w:"staple",pos:"n. / adj.",p:"/ˈsteɪpl/",cn:"主食、常备必需品；订书钉",k:"staple",ex:"Flat whites are a staple of Melbourne café culture.",tr:"Flat white 是墨尔本咖啡馆文化里的标配。"},
+ {d:28,w:"vantage point",pos:"n.",p:"/ˈvɑːntɪdʒ pɔɪnt/",cn:"观景位置；看问题的角度",k:"vantage point",ex:"The lookout gives you the best vantage point over the whole valley.",tr:"那个观景台是俯瞰整个山谷的最佳位置。"},
+ {d:28,w:"feeble",pos:"adj.",p:"/ˈfiːbl/",cn:"微弱无力的；（借口）站不住脚的",k:"feeble",ex:"Mobile coverage gets feeble once you leave the highway.",tr:"一离开高速，手机信号就变得很弱。"},
+ {d:28,w:"touch wood",pos:"phr.",p:"/tʌtʃ wʊd/",cn:"但愿别出事（美式 knock on wood）",k:"touch wood",ex:"No incidents this week — touch wood.",tr:"这周没出故障——但愿别乌鸦嘴。"},
+ {d:28,w:"be none the wiser",pos:"phr.",p:"/nʌn ðə ˈwaɪzə/",cn:"完全没察觉、不明就里",k:"none the wiser",ex:"We failed over at 2 a.m. and the users were none the wiser.",tr:"我们凌晨两点做了切换，用户完全没察觉。"},
+ {d:28,w:"ring a bell",pos:"phr.",p:"/rɪŋ ə bel/",cn:"听着耳熟、有点印象",k:"rings a bell",ex:"That error code rings a bell — I think we saw it last March.",tr:"那个错误码听着耳熟，我记得去年三月见过。"},
+ {d:28,w:"go pear-shaped",pos:"phr.",p:"/ɡəʊ ˈpeəʃeɪpt/",cn:"彻底搞砸、事情崩了（英澳口语）",k:"went pear-shaped",ex:"The upgrade went pear-shaped about twenty minutes in.",tr:"升级开始大约二十分钟后就彻底崩了。"},
+
+ {d:29,tag:"au",w:"mob",pos:"n.",p:"/mɒb/",cn:"一群袋鼠（澳洲专用量词）",k:"A mob",ex:"A mob of kangaroos was grazing right beside the road.",tr:"一群袋鼠正在路边吃草。"},
+ {d:29,tag:"au",w:"pouch",pos:"n.",p:"/paʊtʃ/",cn:"育儿袋（小袋鼠叫 joey）",k:"pouch",ex:"You could just see a joey's foot poking out of the pouch.",tr:"能看到一只小袋鼠的脚从育儿袋里伸出来。"},
+ {d:29,tag:"au",w:"forage",pos:"v.",p:"/ˈfɒrɪdʒ/",cn:"觅食、四处找吃的",k:"forage",ex:"Possums come down to forage once the campsite goes quiet.",tr:"营地一安静下来，负鼠就下来觅食了。"},
+ {d:29,tag:"au",w:"cull",pos:"v. / n.",p:"/kʌl/",cn:"（为控制数量而）扑杀、剔除",k:"Culling",ex:"Culling feral animals remains a contentious policy in Australia.",tr:"扑杀野化动物在澳洲仍是一项有争议的政策。"},
+ {d:29,tag:"au",w:"habitat",pos:"n.",p:"/ˈhæbɪtæt/",cn:"栖息地（habitat loss 栖息地丧失）",k:"habitat",ex:"Bushfires destroyed a huge amount of koala habitat.",tr:"山火摧毁了大量考拉栖息地。"},
+ {d:29,tag:"au",w:"thrive",pos:"v.",p:"/θraɪv/",cn:"繁衍兴旺、长得好（≠survive 只是活着）",k:"thrive",ex:"Rainbow lorikeets thrive in suburban gardens.",tr:"彩虹鹦鹉在城郊的花园里繁衍得很好。"},
+ {d:29,tag:"au",w:"a sight to behold",pos:"phr.",p:"/ə saɪt tə bɪˈhəʊld/",cn:"非常壮观、值得一看的景象",k:"a sight to behold",ex:"Thousands of flying foxes leaving at dusk is a sight to behold.",tr:"黄昏时成千上万只狐蝠飞离，是极为壮观的景象。"},
+ {d:29,tag:"au",w:"keep one's distance",pos:"phr.",p:"/kiːp wʌnz ˈdɪstəns/",cn:"保持距离、别靠太近",k:"Keep your distance",ex:"Keep your distance from kangaroos — the big males can be aggressive.",tr:"离袋鼠远一点，成年雄性可能有攻击性。"},
+ {d:29,tag:"au",w:"out and about",pos:"phr.",p:"/aʊt ənd əˈbaʊt/",cn:"外出活动、在外面走动",k:"out and about",ex:"Wombats are mostly out and about after dark.",tr:"袋熊主要在天黑之后出来活动。"},
+ {d:29,tag:"au",w:"few and far between",pos:"phr.",p:"/fjuː ənd fɑː bɪˈtwiːn/",cn:"寥寥无几、少得可怜",k:"few and far between",ex:"Petrol stations are few and far between out there.",tr:"那一带的加油站少得可怜。"},
+
+ {d:30,w:"dormant",pos:"adj.",p:"/ˈdɔːmənt/",cn:"休眠的、蛰伏不活动的（≠latent）",k:"dormant",ex:"The account had been dormant for two years before someone logged in.",tr:"那个账号已休眠两年，直到有人登录进去。"},
+ {d:30,tag:"au",w:"territorial",pos:"adj.",p:"/ˌterɪˈtɔːriəl/",cn:"护领地的、地盘意识强的",k:"territorial",ex:"Magpies get very territorial while they're nesting.",tr:"喜鹊在筑巢期间地盘意识会变得非常强。"},
+ {d:30,tag:"au",w:"scavenge",pos:"v.",p:"/ˈskævɪndʒ/",cn:"食腐、捡剩的吃",k:"scavenge",ex:"Tasmanian devils scavenge carcasses rather than hunting much.",tr:"袋獾主要以腐肉为食，而不太主动捕猎。"},
+ {d:30,tag:"au",w:"camouflage",pos:"n. / v.",p:"/ˈkæməflɑːʒ/",cn:"伪装、保护色",k:"camouflage",ex:"The frogmouth's camouflage makes it look exactly like a broken branch.",tr:"蟆口鸱的保护色让它看起来就像一截断枝。"},
+ {d:30,tag:"au",w:"resurgence",pos:"n.",p:"/rɪˈsɜːdʒəns/",cn:"重新抬头、回升复苏",k:"resurgence",ex:"There's been a resurgence in the local quoll population.",tr:"当地的袋鼬种群数量出现了回升。"},
+ {d:30,w:"taper",pos:"v.",p:"/ˈteɪpə/",cn:"逐渐变细、慢慢减少（taper off）",k:"tapers off",ex:"Traffic tapers off after eight on weeknights.",tr:"工作日晚上八点之后车流就渐渐少了。"},
+ {d:30,tag:"au",w:"a far cry from something",pos:"phr.",p:"/ə fɑː kraɪ frəm/",cn:"与…相去甚远、差得远",k:"a far cry from",ex:"A zoo enclosure is a far cry from the open bush.",tr:"动物园的围栏跟开阔的灌木林相去甚远。"},
+ {d:30,tag:"au",w:"in one piece",pos:"phr.",p:"/ɪn wʌn piːs/",cn:"完好无损地（人或物）",k:"in one piece",ex:"We made it back from the outback in one piece.",tr:"我们从内陆平安无事地回来了。"},
+ {d:30,tag:"au",w:"up close",pos:"phr.",p:"/ʌp kləʊs/",cn:"近距离地",k:"up close",ex:"You don't appreciate how big an emu is until you see one up close.",tr:"不近距离看一次，你不会知道鸸鹋有多大。"},
+ {d:30,w:"call it a night",pos:"phr.",p:"/kɔːl ɪt ə naɪt/",cn:"今晚就到这儿（call it a day 的夜间版）",k:"call it a night",ex:"The spotlighting walk was great, but let's call it a night.",tr:"夜观动物挺好玩的，不过今晚就到这儿吧。"},
+
+ {d:31,w:"reinstate",pos:"v.",p:"/ˌriːɪnˈsteɪt/",cn:"恢复（权限、职位、规则）",k:"reinstated",ex:"We reinstated the read-only role after the audit finished.",tr:"审计结束后我们恢复了那个只读角色。"},
+ {d:31,w:"cursory",pos:"adj.",p:"/ˈkɜːsəri/",cn:"草草的、走马观花的（≠rigorous）",k:"cursory",ex:"A cursory look at the logs won't tell you much — you need the raw output.",tr:"草草看一眼日志说明不了什么，你得看原始输出。"},
+ {d:31,w:"unwieldy",pos:"adj.",p:"/ʌnˈwiːldi/",cn:"笨重难操作的、大得不好使",k:"unwieldy",ex:"The config file has grown unwieldy — nobody knows what half of it does.",tr:"这个配置文件已经臃肿到不好使了，一半的内容没人知道是干什么的。"},
+ {d:31,w:"pivotal",pos:"adj.",p:"/ˈpɪvətl/",cn:"关键性的、起决定作用的",k:"pivotal",ex:"The CloudTrail entry was pivotal in working out what actually happened.",tr:"那条 CloudTrail 记录对弄清真相起了关键作用。"},
+ {d:31,w:"sodden",pos:"adj.",p:"/ˈsɒdn/",cn:"湿透的、浸饱水的（≠humid 空气闷湿）",k:"sodden",ex:"The track was sodden after two days of rain.",tr:"下了两天雨，那条小路已经湿透了。"},
+ {d:31,w:"sluggish",pos:"adj.",p:"/ˈslʌɡɪʃ/",cn:"（市场）低迷不振的（第二义项）",k:"sluggish",ex:"The market has been sluggish since the rate decision.",tr:"利率决议之后市场一直很低迷。"},
+ {d:31,w:"take something with a grain of salt",pos:"phr.",p:"/ə ɡreɪn əv sɔːlt/",cn:"对某事持保留态度、别全信",k:"with a grain of salt",ex:"Take the vendor's benchmark numbers with a grain of salt.",tr:"厂商那些跑分数据，别全信。"},
+ {d:31,w:"the lay of the land",pos:"phr.",p:"/ðə leɪ əv ðə lænd/",cn:"局势大概、情况全貌",k:"the lay of the land",ex:"Give me a week to get the lay of the land before I commit to a timeline.",tr:"给我一周时间了解一下情况，再定时间表。"},
+ {d:31,w:"cut to the chase",pos:"phr.",p:"/kʌt tə ðə tʃeɪs/",cn:"直接说重点、别绕弯子",k:"cut to the chase",ex:"Let me cut to the chase — we need another maintenance window.",tr:"我直接说重点：我们还需要一个维护窗口。"},
+ {d:31,w:"be up to scratch",pos:"phr.",p:"/ʌp tə skrætʃ/",cn:"达到标准、够格（英澳）",k:"up to scratch",ex:"The documentation isn't up to scratch for a production handover.",tr:"这份文档还达不到生产环境交接的标准。"},
+
+ {d:32,w:"entail",pos:"v.",p:"/ɪnˈteɪl/",cn:"涉及、必然包含（多少工作量）",k:"entails",ex:"The upgrade entails downtime on all three clusters.",tr:"这次升级必然涉及三个集群的停机。"},
+ {d:32,w:"expedient",pos:"adj. / n.",p:"/ɪkˈspiːdiənt/",cn:"图方便的、权宜的（≠expedite 加快）",k:"expedient",ex:"Restarting was the expedient choice, not the correct one.",tr:"重启是图方便的选择，而不是正确的选择。"},
+ {d:32,w:"corrosive",pos:"adj.",p:"/kəˈrəʊsɪv/",cn:"腐蚀性的；（对士气）侵蚀性的",k:"corrosive",ex:"Salt air off the coast is corrosive — check the underbody after the trip.",tr:"海边的盐分空气有腐蚀性，这趟回来检查一下底盘。"},
+ {d:32,w:"amenable",pos:"adj.",p:"/əˈmiːnəbl/",cn:"愿意配合的、听得进意见的（amenable to）",k:"amenable",ex:"The security team is amenable to a phased rollout.",tr:"安全团队愿意配合分阶段上线的方案。"},
+ {d:32,tag:"au",w:"brackish",pos:"adj.",p:"/ˈbrækɪʃ/",cn:"半咸的（淡咸水交汇）",k:"brackish",ex:"Estuarine crocodiles live in brackish water near river mouths.",tr:"河口鳄栖息在入海口附近的半咸水中。"},
+ {d:32,w:"supple",pos:"adj.",p:"/ˈsʌpl/",cn:"柔韧顺从的（身体或悬架）",k:"supple",ex:"The damping feels supple over broken tarmac without going soft.",tr:"这套阻尼在破损路面上很柔韧，但又不显得软。"},
+ {d:32,w:"go back to the drawing board",pos:"phr.",p:"/ðə ˈdrɔːɪŋ bɔːd/",cn:"推翻重新设计（比 square one 更强）",k:"back to the drawing board",ex:"If prefix delegation doesn't help, we go back to the drawing board.",tr:"如果前缀委派也没用，我们就得推翻重新设计。"},
+ {d:32,w:"bend over backwards",pos:"phr.",p:"/bend ˈəʊvə ˈbækwədz/",cn:"竭尽全力去配合、拼命迁就",k:"bent over backwards",ex:"We bent over backwards to fit their timeline and they still missed it.",tr:"我们竭尽全力配合他们的时间表，结果他们还是没赶上。"},
+ {d:32,w:"a blessing in disguise",pos:"phr.",p:"/ə ˈblesɪŋ ɪn dɪsˈɡaɪz/",cn:"塞翁失马、坏事变好事",k:"a blessing in disguise",ex:"The failed deploy was a blessing in disguise — it exposed the missing alert.",tr:"那次部署失败反倒是好事，它暴露了缺失的告警。"},
+ {d:32,w:"all things considered",pos:"phr.",p:"/ɔːl θɪŋz kənˈsɪdəd/",cn:"综合来看、考虑到各种因素",k:"All things considered",ex:"All things considered, a forty-minute outage wasn't a bad outcome.",tr:"综合来看，四十分钟的中断算不上糟糕的结果。"},
+  {"d": 33, "w": "underwhelming", "pos": "adj.", "p": "/ˌʌndəˈwelmɪŋ/", "cn": "令人失望的；不如预期惊艳", "usage": "评价没有想象中出色的体验，比 disappointing 更委婉。", "ex": "The restaurant had amazing reviews, but the food was honestly a bit underwhelming.", "tr": "那家餐厅评价特别高，但说实话，食物有点让人失望。", "k": "underwhelming"},
+  {"d": 33, "w": "spontaneous", "pos": "adj.", "p": "/spɒnˈteɪniəs/", "cn": "随性的；即兴的；心血来潮的", "usage": "常修饰临时起意的旅行、决定或活动；spontaneous trip。", "ex": "We went on a spontaneous road trip down the coast last weekend.", "tr": "上周末我们心血来潮，沿着海岸线自驾了一趟。", "k": "spontaneous"},
+  {"d": 33, "w": "flustered", "pos": "adj.", "p": "/ˈflʌstəd/", "cn": "慌乱的；手忙脚乱的", "usage": "get flustered 表示由于压力或突发情况而一时慌了阵脚。", "ex": "I got a bit flustered when everyone started asking me questions at once.", "tr": "大家突然同时问我问题，我一下子有点手忙脚乱。", "k": "flustered"},
+  {"d": 33, "w": "considerate", "pos": "adj.", "p": "/kənˈsɪdərət/", "cn": "体贴的；考虑周到的", "usage": "It was considerate of someone to do something 表示某人做某事很体贴。", "ex": "It was really considerate of her to check whether everyone had got home safely.", "tr": "她特意确认大家是否安全到家，真的很体贴。", "k": "considerate"},
+  {"d": 33, "w": "apprehensive", "pos": "adj.", "p": "/ˌæprɪˈhensɪv/", "cn": "忐忑不安的；心存顾虑的", "usage": "be apprehensive about something：对未来或未知的事情感到不安。", "ex": "I was a little apprehensive about joining the badminton club, but everyone turned out to be really friendly.", "tr": "刚开始我对加入羽毛球俱乐部有点忐忑，但后来发现大家都很友好。", "k": "apprehensive"},
+  {"d": 33, "w": "knack", "pos": "n.", "p": "/næk/", "cn": "诀窍；特别擅长某事的本事", "usage": "have a knack for something / doing something 是常用固定搭配。", "ex": "He's got a knack for making people feel comfortable, even when they've only just met.", "tr": "他特别擅长让人感到自在，即使是刚认识的人也一样。", "k": "knack"},
+  {"d": 33, "w": "I'm not fussed", "pos": "phr.", "p": "/aɪm nɒt fʌst/", "cn": "我都行；我没有特别偏好", "usage": "英澳常用口语，表示对两个选择都可以，不一定是不感兴趣。", "ex": "I'm not fussed whether we get Thai or Japanese food tonight — whatever you feel like.", "tr": "今晚吃泰餐还是日餐我都行——看你想吃什么。", "k": "I'm not fussed"},
+  {"d": 33, "w": "It slipped my mind", "pos": "phr.", "p": "/ɪt slɪpt maɪ maɪnd/", "cn": "我一时忘了", "usage": "委婉自然地解释非故意忘事；也可说 It completely slipped my mind。", "ex": "I was supposed to call you yesterday, but it completely slipped my mind.", "tr": "我昨天本来应该给你打电话的，但我完全忘了。", "k": "slipped my mind"},
+  {"d": 33, "w": "read the room", "pos": "phr.", "p": "/riːd ðə ruːm/", "cn": "察言观色；看清场合气氛", "usage": "判断社交环境中其他人的情绪和现场氛围。", "ex": "He started joking while everyone was stressed. He really needs to read the room.", "tr": "大家都很焦虑时他却开始开玩笑。他真应该学会看场合。", "k": "read the room"},
+  {"d": 33, "w": "go out of your way", "pos": "phr.", "p": "/ɡəʊ aʊt əv jɔː weɪ/", "cn": "特意费心；不嫌麻烦", "usage": "go out of your way to do something，常用于感谢额外付出。", "ex": "You didn't have to go out of your way to pick me up from the airport, but I appreciate it.", "tr": "你其实不用特意跑一趟机场接我，不过真的很感谢。", "k": "go out of your way"}
+];
+
+let voices = [];
+function loadVoices(){ voices = window.speechSynthesis ? speechSynthesis.getVoices() : []; }
+loadVoices();
+if (window.speechSynthesis) speechSynthesis.onvoiceschanged = loadVoices;
+function say(text){
+  if (!window.speechSynthesis) {alert("此浏览器不支持语音朗读，请尝试 Safari 或 Chrome。");return;}
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  const lang = document.getElementById("accentSelect").value;
+  u.lang = lang;
+  const available = voices.filter(v => v.lang && v.lang.replace("_","-").toLowerCase() === lang.toLowerCase());
+  if(available.length) u.voice = available.find(v => /premium|enhanced|natural/i.test(v.name)) || available[0];
+  u.rate = 0.85;
+  speechSynthesis.speak(u);
+}
+
+function esc(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function isPhrase(x){ return x.pos.indexOf("phr") === 0; }
+function makeCloze(item){
+  const len = isPhrase(item) ? Math.max(6, Math.min(16, item.k.length)) : 6;
+  return item.ex.replace(new RegExp(esc(item.k), "i"), '<span class="blank">' + "_".repeat(len) + '</span>');
+}
+
+let queue = [], idx = 0, missed = [];
+function pool(){
+  const v = document.getElementById("scope").value;
+  if (v === "0") return DATA.slice();
+  if (v === "p") return DATA.filter(isPhrase);
+  if (v === "v") return DATA.filter(x => !isPhrase(x));
+  if (v === "b") return DATA.filter(x => x.tag === "bad");
+  if (v === "z") return DATA.filter(x => x.tag === "au");
+  if (v === "r") return DATA.filter(x => x.d >= 30);
+  if (v === "m") return DATA.filter(x => x.d >= 8 && x.d <= 28);
+  if (v === "e") return DATA.filter(x => x.d <= 7);
+  return DATA.filter(x => x.d === parseInt(v, 10));
+}
+function shuffle(a){
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function start(list){
+  queue = shuffle(list.slice()); idx = 0; missed = [];
+  document.getElementById("done").style.display = "none";
+  document.getElementById("quiz").style.display = "block";
+  render();
+}
+function render(){
+  if (idx >= queue.length) return finish();
+  const it = queue[idx];
+  document.getElementById("pcn").textContent = it.cn;
+  const pp = document.getElementById("ppos");
+  pp.textContent = it.pos;
+  pp.className = isPhrase(it) ? "prompt-pos p" : "prompt-pos";
+  document.getElementById("pday").textContent = "Day " + it.d;
+  document.getElementById("cloze").innerHTML = makeCloze(it);
+  const ct = document.getElementById("clozetr");
+  ct.textContent = it.tr;
+  ct.className = isPhrase(it) ? "clozetr show" : "clozetr";
+  document.getElementById("aw").textContent = it.w;
+  document.getElementById("aipa").textContent = it.p;
+  document.getElementById("aen").textContent = it.ex;
+   document.getElementById("usage").textContent = it.usage ? "💡 用法："+it.usage : "";
+  document.getElementById("atr").textContent = it.tr;
+  document.getElementById("ans").classList.remove("show");
+  document.getElementById("rowReveal").style.display = "flex";
+  document.getElementById("rowJudge").style.display = "none";
+  document.getElementById("prog").textContent = (idx+1) + " / " + queue.length;
+  document.getElementById("fill").style.width = (idx / queue.length * 100) + "%";
+}
+function finish(){
+  document.getElementById("quiz").style.display = "none";
+  document.getElementById("done").style.display = "block";
+  document.getElementById("fill").style.width = "100%";
+  document.getElementById("prog").textContent = "完成";
+  const total = queue.length, ok = total - missed.length;
+  document.getElementById("doneTitle").textContent = "本轮完成：记得 " + ok + " / " + total;
+  const ml = document.getElementById("missList");
+  ml.innerHTML = "";
+  if (missed.length) {
+    document.getElementById("doneSub").textContent = "以下这些还需要再过一遍：";
+    missed.forEach(it => {
+      const d = document.createElement("div");
+      d.className = "miss";
+      d.innerHTML = "<b>" + it.w + "</b><span>Day " + it.d + " · " + it.cn + "</span>";
+      ml.appendChild(d);
+    });
+    document.getElementById("again").style.display = "block";
+  } else {
+    document.getElementById("doneSub").textContent = "全部记住了，这轮很干净 👏";
+    document.getElementById("again").style.display = "none";
+  }
+}
+document.getElementById("reveal").addEventListener("click", () => {
+  document.getElementById("ans").classList.add("show");
+  document.getElementById("rowReveal").style.display = "none";
+  document.getElementById("rowJudge").style.display = "flex";
+  say(queue[idx].w.replace(/^a /,"").replace(/^be /,"").replace(/ something/g," it").replace(/someone/g,"somebody").replace(/-/g," "));
+});
+document.getElementById("btnOk").addEventListener("click", () => { idx++; render(); });
+document.getElementById("btnNo").addEventListener("click", () => { missed.push(queue[idx]); idx++; render(); });
+document.getElementById("btnWord").addEventListener("click", () => say(queue[idx].w));
+ document.getElementById("btnSay").addEventListener("click", () => say(queue[idx].ex));
+document.getElementById("again").addEventListener("click", () => start(missed));
+document.getElementById("restart").addEventListener("click", () => start(pool()));
+document.getElementById("scope").addEventListener("change", () => start(pool()));
+start(pool());
+</script>
+</body>
+</html>
