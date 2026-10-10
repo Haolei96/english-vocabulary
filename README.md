@@ -11,7 +11,9 @@ My C1+ English Vocabulary Learning
 node scripts/validate.cjs
 ```
 
-如果终端没有 Node.js，Codex 可使用 `load_workspace_dependencies` 返回的内置 Node.js。验证会检查 Day 1–33 原始 330 项未改变、每天数量、新增项字段、重复词、日期及完整 JavaScript 语法。
+如果终端没有 Node.js，Codex 可使用 `load_workspace_dependencies` 返回的内置 Node.js。验证会检查 Day 1–33 原始词条和例句未改变、Day 1–32 补充的小贴士完整保留、所有词条都有用法提示，以及每天数量、新增项字段、重复词、日期及完整 JavaScript 语法。
+
+历史词条已补齐 💡 用法小贴士；点击「显示答案」后，可查看常用搭配、语气和易混点。
 
 每日任务目标时间为 Asia/Shanghai 08:00。使用 Codex 本地定时任务时，Mac 需保持可运行、应用运行，且 GitHub 认证可用。任务按日期防止重复新增，推送 `main` 后检查 GitHub Pages 是否出现新内容。GitHub 登录或发布验证失败必须明确报告，不能把本地提交视为已发布。
 
