@@ -38,6 +38,17 @@ for (const item of data) {
   }
   assert.ok(item.p.startsWith('/') && item.p.endsWith('/'), `${item.w}: invalid IPA format`);
   assert.ok(item.ex.toLowerCase().includes(item.k.toLowerCase()), `${item.w}: cloze text missing from example`);
+  assert.ok(item.kind === undefined || item.kind === 'reading', `${item.w}: invalid learning kind`);
+  if (item.kind === 'reading') {
+    assert.ok(item.source && Number.isInteger(item.source.page) && item.source.page > 0,
+      `${item.w}: missing reading source page`);
+    for (const key of ['id', 'title', 'form', 'quote', 'tr']) {
+      assert.ok(typeof item.source[key] === 'string' && item.source[key].trim(),
+        `${item.w}: missing reading source ${key}`);
+    }
+    assert.ok(item.source.quote.toLowerCase().includes(item.source.form.toLowerCase()),
+      `${item.w}: source form missing from original quote`);
+  }
   if (!byDay.has(item.d)) byDay.set(item.d, []);
   byDay.get(item.d).push(item);
   const word = normalize(item.w);
@@ -49,8 +60,11 @@ for (const item of data) {
     assert.match(item.date || '', /^\d{4}-\d{2}-\d{2}$/, `${item.w}: missing publication date`);
     const date = new Date(item.date + 'T00:00:00Z');
     assert.ok(!Number.isNaN(date.getTime()) && date.toISOString().slice(0,10) === item.date, 'Invalid date');
-    assert.ok(!dates.has(item.date) || dates.get(item.date) === item.d, 'Two learning days share a publication date');
-    dates.set(item.date, item.d);
+    // Explicit reading imports can share their actual import date. Daily updates cannot.
+    if (item.kind !== 'reading') {
+      assert.ok(!dates.has(item.date) || dates.get(item.date) === item.d, 'Two daily learning days share a publication date');
+      dates.set(item.date, item.d);
+    }
   }
 }
 
@@ -62,12 +76,22 @@ for (let day = 1; day <= latestDay; day++) {
     assert.equal(items.filter(x => x.pos.startsWith('phr')).length, 4, `Day ${day}: expected 4 phrases`);
   }
   if (day >= 34) assert.equal(new Set(items.map(x => x.date)).size, 1, `Day ${day}: inconsistent dates`);
+  const reading = items[0].kind === 'reading';
+  assert.ok(items.every(x => (x.kind === 'reading') === reading), `Day ${day}: mixed daily and reading items`);
+  if (reading) {
+    assert.equal(new Set(items.map(x => x.source.id)).size, 1, `Day ${day}: mixed reading sources`);
+    assert.equal(new Set(items.map(x => x.source.title)).size, 1, `Day ${day}: inconsistent reading title`);
+  }
 }
 for (let day = 35; day <= latestDay; day++) {
-  assert.ok(byDay.get(day)[0].date > byDay.get(day-1)[0].date, `Day ${day}: publication date did not advance`);
+  const current = byDay.get(day)[0], previous = byDay.get(day-1)[0];
+  assert.ok(current.kind === 'reading' ? current.date >= previous.date : current.date > previous.date,
+    `Day ${day}: publication date did not advance`);
 }
 assert.equal(data.length, latestDay * 10, 'Total and learning days disagree');
 const phrases = data.filter(x => x.pos.startsWith('phr')).length;
 console.log(`Validated Day 1–${latestDay}: ${data.length} items (${data.length-phrases} words + ${phrases} phrases).`);
 console.log('Day 1–33 original fields unchanged; Day 1–32 tips preserved; all items have usage tips.');
 console.log(`Latest publication: ${byDay.get(latestDay)[0].date || 'historical date unknown'}.`);
+const readingItems = data.filter(x => x.kind === 'reading').length;
+if (readingItems) console.log(`Reading supplements: ${readingItems} items; original source references complete. Daily date limits remain enforced.`);
