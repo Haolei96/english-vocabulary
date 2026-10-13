@@ -34,6 +34,8 @@
     background: var(--card); border-radius: 12px; padding: 10px 12px; margin-bottom: 14px;
   }
   .bar label { font-size: 13px; color: var(--sub); }
+  .day-range { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; width: 100%; }
+  .day-range span { font-size: 13px; color: var(--sub); }
   select {
     font-size: 14px; padding: 5px 8px; border-radius: 8px;
     border: 1px solid var(--line); background: var(--bg); color: var(--ink);
@@ -55,7 +57,9 @@
   .aw { font-size: 21px; font-weight: 700; }
   .ipa { font-size: 13px; color: var(--muted); font-family: ui-monospace, monospace; margin-left: 8px; }
   .usage {font-size:13px;line-height:1.65;color:var(--sub);margin:12px 0 0;}
-  .en { font-size: 15px; font-style: italic; margin: 12px 0 0; line-height: 1.6; }
+  .sentence-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; }
+  .en { font-size: 15px; font-style: italic; margin: 0; line-height: 1.6; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .sentence-row .say { flex: 0 0 44px; }
   .tr { font-size: 13px; color: var(--muted); margin: 3px 0 0; line-height: 1.6; }
   .row { display: flex; gap: 8px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
   button {
@@ -78,32 +82,17 @@
 <p class="sub" id="summary">Day 1–38 · 380 项｜先看中文和挖空例句，再翻开答案；支持朗读、口音切换与错题复习。</p>
 
 <div class="bar">
-  <label>范围</label>
+  <div class="day-range">
+    <label for="dayFrom">学习日</label>
+    <select id="dayFrom" aria-label="开始学习日"></select>
+    <span>至</span>
+    <select id="dayTo" aria-label="结束学习日"></select>
+  </div>
+  <label for="scope">类型</label>
   <select id="scope">
     <option value="0">全部 380 项</option>
     <option value="p">只练短语（136）</option>
     <option value="v">只练单词（244）</option>
-    <option value="b">羽毛球专题（17）</option>
-    <option value="z">澳洲专题（35）</option>
-    <option value="r">最近四天（Day 35–38）</option>
-    <option value="m">中段（Day 8–28）</option>
-    <option value="e">较早的（Day 1–7）</option>
-    <option value="1">Day 1</option><option value="2">Day 2</option>
-    <option value="3">Day 3</option><option value="4">Day 4</option>
-    <option value="5">Day 5</option><option value="6">Day 6</option>
-    <option value="7">Day 7</option><option value="8">Day 8</option>
-    <option value="9">Day 9</option><option value="10">Day 10</option>
-    <option value="11">Day 11</option><option value="12">Day 12</option>
-    <option value="13">Day 13</option><option value="14">Day 14</option>
-    <option value="15">Day 15</option><option value="16">Day 16</option>
-    <option value="17">Day 17</option><option value="18">Day 18</option>
-    <option value="19">Day 19</option><option value="20">Day 20</option>
-    <option value="21">Day 21</option><option value="22">Day 22</option>
-    <option value="23">Day 23</option><option value="24">Day 24</option>
-    <option value="25">Day 25</option><option value="26">Day 26</option>
-    <option value="27">Day 27</option><option value="28">Day 28</option>
-    <option value="29">Day 29</option><option value="30">Day 30</option>
-    <option value="31">Day 31</option><option value="32">Day 32</option><option value="33">Day 33</option><option value="34">Day 34</option><option value="35">Day 35</option><option value="36">Day 36</option><option value="37">Day 37</option><option value="38">Day 38</option>
   </select>
   <label for="accentSelect">口音</label><select id="accentSelect"><option value="en-AU">🇦🇺 澳洲</option><option value="en-GB">🇬🇧 英国</option><option value="en-US">🇺🇸 美国</option></select>
   <button id="restart" style="font-size:13px;padding:6px 12px;">重新开始</button>
@@ -126,7 +115,10 @@
       </div>
       <p class="usage" id="usage"></p>
        <div class="row"><button class="say" id="btnWord" aria-label="朗读单词">🔊</button><span class="tr">朗读单词 / 短语</span></div>
-       <p class="en" id="aen"></p>
+      <div class="sentence-row">
+        <p class="en" id="aen"></p>
+        <button class="say" id="btnSay" aria-label="朗读例句">🔊</button>
+      </div>
       <p class="tr" id="atr"></p>
     </div>
     <div class="row" id="rowReveal">
@@ -135,7 +127,6 @@
     <div class="row" id="rowJudge" style="display:none;">
       <button class="no" id="btnNo">还不熟</button>
       <button class="ok" id="btnOk">记得</button>
-      <button class="say" id="btnSay" aria-label="朗读例句">🔊</button>
     </div>
   </div>
 </div>
@@ -572,22 +563,41 @@ function updateSummary(){
   document.title = title;
   document.querySelector("h1").textContent = title;
   document.getElementById("summary").textContent = "Day 1–" + latestDay + " · " + DATA.length + " 项｜先看中文和挖空例句，再翻开答案；支持朗读、口音切换与错题复习。";
-  const scope = document.getElementById("scope");
+  const days = [...new Set(DATA.map(x => x.d))].sort((a,b) => a-b);
+  for (const id of ["dayFrom", "dayTo"]) {
+    const select = document.getElementById(id);
+    select.replaceChildren();
+    for (const day of days) select.add(new Option("Day " + day, String(day)));
+    select.value = String(id === "dayFrom" ? days[0] : latestDay);
+  }
+  updateFilterLabels();
+}
+function dayRange(){
+  const from = Number(document.getElementById("dayFrom").value);
+  const to = Number(document.getElementById("dayTo").value);
+  return DATA.filter(x => x.d >= from && x.d <= to);
+}
+function updateFilterLabels(){
+  const items = dayRange();
+  const phrases = items.filter(isPhrase).length;
   const labels = {
-    "0": "全部 " + DATA.length + " 项",
-    "p": "只练短语（" + DATA.filter(isPhrase).length + "）",
-    "v": "只练单词（" + DATA.filter(x => !isPhrase(x)).length + "）",
-    "b": "羽毛球专题（" + DATA.filter(x => x.tag === "bad").length + "）",
-    "z": "澳洲专题（" + DATA.filter(x => x.tag === "au").length + "）",
-    "r": "最近四天（Day " + Math.max(1, latestDay - 3) + "–" + latestDay + "）"
+    "0": "全部 " + items.length + " 项",
+    "p": "只练短语（" + phrases + "）",
+    "v": "只练单词（" + (items.length - phrases) + "）"
   };
-  for (const option of [...scope.options]) {
-    if (/^\d+$/.test(option.value) && option.value !== "0") option.remove();
-    else if (labels[option.value]) option.textContent = labels[option.value];
+  for (const option of document.getElementById("scope").options) {
+    option.textContent = labels[option.value];
   }
-  for (const day of [...new Set(DATA.map(x => x.d))].sort((a,b) => a-b)) {
-    scope.add(new Option("Day " + day, String(day)));
+}
+function changeRange(changed){
+  const from = document.getElementById("dayFrom");
+  const to = document.getElementById("dayTo");
+  if (Number(from.value) > Number(to.value)) {
+    if (changed === "dayFrom") to.value = from.value;
+    else from.value = to.value;
   }
+  updateFilterLabels();
+  start(pool());
 }
 
 let voices = [];
@@ -616,15 +626,10 @@ function makeCloze(item){
 let queue = [], idx = 0, missed = [];
 function pool(){
   const v = document.getElementById("scope").value;
-  if (v === "0") return DATA.slice();
-  if (v === "p") return DATA.filter(isPhrase);
-  if (v === "v") return DATA.filter(x => !isPhrase(x));
-  if (v === "b") return DATA.filter(x => x.tag === "bad");
-  if (v === "z") return DATA.filter(x => x.tag === "au");
-  if (v === "r") return DATA.filter(x => x.d >= Math.max(1, latestDay - 3));
-  if (v === "m") return DATA.filter(x => x.d >= 8 && x.d <= 28);
-  if (v === "e") return DATA.filter(x => x.d <= 7);
-  return DATA.filter(x => x.d === parseInt(v, 10));
+  const items = dayRange();
+  if (v === "p") return items.filter(isPhrase);
+  if (v === "v") return items.filter(x => !isPhrase(x));
+  return items;
 }
 function shuffle(a){
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
@@ -668,6 +673,14 @@ function finish(){
   document.getElementById("doneTitle").textContent = "本轮完成：记得 " + ok + " / " + total;
   const ml = document.getElementById("missList");
   ml.innerHTML = "";
+  if (!total) {
+    document.getElementById("doneTitle").textContent = "所选范围没有可练习的词条";
+    document.getElementById("doneSub").textContent = "请调整学习日范围或词条类型。";
+    document.getElementById("again").style.display = "none";
+    document.getElementById("prog").textContent = "0 / 0";
+    document.getElementById("fill").style.width = "0%";
+    return;
+  }
   if (missed.length) {
     document.getElementById("doneSub").textContent = "以下这些还需要再过一遍：";
     missed.forEach(it => {
@@ -695,6 +708,9 @@ document.getElementById("btnWord").addEventListener("click", () => say(queue[idx
 document.getElementById("again").addEventListener("click", () => start(missed));
 document.getElementById("restart").addEventListener("click", () => start(pool()));
 document.getElementById("scope").addEventListener("change", () => start(pool()));
+for (const id of ["dayFrom", "dayTo"]) {
+  document.getElementById(id).addEventListener("change", () => changeRange(id));
+}
 updateSummary();
 start(pool());
 </script>
