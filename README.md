@@ -11,11 +11,13 @@ My C1+ English Vocabulary Learning
 node scripts/validate.cjs
 ```
 
-阅读批次与每日日期限制的回归检查：`node scripts/validate.test.cjs`。
+例句、中文提示、阅读批次与每日日期限制的回归检查：`node scripts/validate.test.cjs`。
 
-如果终端没有 Node.js，Codex 可使用 `load_workspace_dependencies` 返回的内置 Node.js。验证会检查 Day 1–33 原始词条和例句未改变、Day 1–32 补充的小贴士完整保留、所有词条都有用法提示，以及每天数量、新增项字段、重复词、日期及完整 JavaScript 语法。
+如果终端没有 Node.js，Codex 可使用 `load_workspace_dependencies` 返回的内置 Node.js。验证会检查原始历史与小贴士基线、每项三个双语例句、纯中文题面，以及每天数量、新增项字段、重复词、日期及完整 JavaScript 语法。2026-10-20 授权清理的 34 处英文括注及小灯泡追加记录在 `scripts/prompt-migrations.json`，还原这些明确变更后仍须匹配原历史哈希。
 
 历史词条已补齐 💡 用法小贴士；点击「显示答案」后，可查看常用搭配、语气和易混点。
+
+每个单词或短语都有三个英文例句及中文翻译，点击「显示答案」后展示，每句旁边都有独立的朗读按钮。原例句仍用于挖空练习，新增两句提供不同语境。中文题面中的英文括注已移除；有用的搭配、易混词和发音提示放在小灯泡中。
 
 Day 39–44 是从《歪唇男人》中英对照文本精选的 60 项阅读补充，每组 6 个单词、4 个短语。答案使用现代例句，展开「原文第 X 页」可查看书中的英文及此前译文。阅读批次使用实际导入日期，多个批次可同日加入；普通每日任务仍最多新增一组，并按最新 Day 编号继续。
 

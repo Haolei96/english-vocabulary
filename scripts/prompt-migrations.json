@@ -1,0 +1,274 @@
+[
+  {
+    "index": 100,
+    "d": 11,
+    "w": "attest",
+    "before": "证明、证实（attest to sth）",
+    "after": "证明、证实",
+    "usageSuffix": ""
+  },
+  {
+    "index": 101,
+    "d": 11,
+    "w": "defer",
+    "before": "推迟；（defer to）听从某人意见",
+    "after": "推迟；听从某人意见",
+    "usageSuffix": ""
+  },
+  {
+    "index": 121,
+    "d": 13,
+    "w": "pertinent",
+    "before": "切题的、相关的（比 relevant 正式）",
+    "after": "切题的、相关的",
+    "usageSuffix": " 语域提示：pertinent 比 relevant 更正式。"
+  },
+  {
+    "index": 130,
+    "d": 14,
+    "w": "discrete",
+    "before": "独立分开的、离散的（≠discreet 谨慎）",
+    "after": "独立分开的、离散的",
+    "usageSuffix": ""
+  },
+  {
+    "index": 140,
+    "d": 15,
+    "w": "attribute",
+    "before": "归因于（attribute A to B）",
+    "after": "归因于",
+    "usageSuffix": ""
+  },
+  {
+    "index": 143,
+    "d": 15,
+    "w": "abrupt",
+    "before": "突兀的、生硬的（≠progressive）",
+    "after": "突兀的、生硬的",
+    "usageSuffix": " 易混提示：progressive 强调渐进，abrupt 强调突然、生硬。"
+  },
+  {
+    "index": 162,
+    "d": 17,
+    "w": "latent",
+    "before": "潜伏的、尚未显现的（≠latency）",
+    "after": "潜伏的、尚未显现的",
+    "usageSuffix": ""
+  },
+  {
+    "index": 164,
+    "d": 17,
+    "w": "rugged",
+    "before": "崎岖粗犷的；耐造的（读 RUG-gid）",
+    "after": "崎岖粗犷的；耐造的",
+    "usageSuffix": " 发音提示：重音在首音节，结尾读 /ɡɪd/。"
+  },
+  {
+    "index": 170,
+    "d": 18,
+    "w": "contingent",
+    "before": "取决于…的（contingent on）",
+    "after": "取决于…的",
+    "usageSuffix": ""
+  },
+  {
+    "index": 173,
+    "d": 18,
+    "w": "twitchy",
+    "before": "（转向）过于敏感神经质的（≠nimble）",
+    "after": "（转向）过于敏感神经质的",
+    "usageSuffix": " 易混提示：nimble 表示灵活敏捷，不含过度敏感、神经质的意思。"
+  },
+  {
+    "index": 175,
+    "d": 18,
+    "w": "frugal",
+    "before": "节俭的（褒义，≠stingy 抠门）",
+    "after": "节俭的",
+    "usageSuffix": ""
+  },
+  {
+    "index": 184,
+    "d": 19,
+    "w": "agility",
+    "before": "敏捷性（形容词 agile /ˈædʒaɪl/）",
+    "after": "敏捷性",
+    "usageSuffix": ""
+  },
+  {
+    "index": 189,
+    "d": 19,
+    "w": "be off one's game",
+    "before": "状态不佳（反义 on my game）",
+    "after": "状态不佳",
+    "usageSuffix": ""
+  },
+  {
+    "index": 193,
+    "d": 20,
+    "w": "venomous",
+    "before": "有毒的（咬你注毒；≠poisonous 吃了中毒）",
+    "after": "有毒的",
+    "usageSuffix": ""
+  },
+  {
+    "index": 201,
+    "d": 21,
+    "w": "feral",
+    "before": "野化的（原本家养；≠wild 天生野生）",
+    "after": "野化的",
+    "usageSuffix": ""
+  },
+  {
+    "index": 204,
+    "d": 21,
+    "w": "reflexes",
+    "before": "反应神经（单数 reflex）",
+    "after": "反应神经",
+    "usageSuffix": ""
+  },
+  {
+    "index": 234,
+    "d": 24,
+    "w": "cramped",
+    "before": "狭窄局促的（≠cramp 抽筋）",
+    "after": "狭窄局促的",
+    "usageSuffix": ""
+  },
+  {
+    "index": 241,
+    "d": 25,
+    "w": "supersede",
+    "before": "取代、替代（拼 -sede 不是 -cede）",
+    "after": "取代、替代",
+    "usageSuffix": ""
+  },
+  {
+    "index": 251,
+    "d": 26,
+    "w": "nuance",
+    "before": "细微差别、微妙之处（nuanced 的名词）",
+    "after": "细微差别、微妙之处",
+    "usageSuffix": ""
+  },
+  {
+    "index": 258,
+    "d": 26,
+    "w": "on the same wavelength",
+    "before": "想法合拍、很默契（≠on the same page）",
+    "after": "想法合拍、很默契",
+    "usageSuffix": ""
+  },
+  {
+    "index": 260,
+    "d": 27,
+    "w": "prone",
+    "before": "易于出问题的（prone to）",
+    "after": "易于出问题的",
+    "usageSuffix": ""
+  },
+  {
+    "index": 270,
+    "d": 28,
+    "w": "scrutinise",
+    "before": "细看审查（美式拼 scrutinize）",
+    "after": "细看审查",
+    "usageSuffix": ""
+  },
+  {
+    "index": 276,
+    "d": 28,
+    "w": "touch wood",
+    "before": "但愿别出事（美式 knock on wood）",
+    "after": "但愿别出事",
+    "usageSuffix": ""
+  },
+  {
+    "index": 281,
+    "d": 29,
+    "w": "pouch",
+    "before": "育儿袋（小袋鼠叫 joey）",
+    "after": "育儿袋",
+    "usageSuffix": ""
+  },
+  {
+    "index": 284,
+    "d": 29,
+    "w": "habitat",
+    "before": "栖息地（habitat loss 栖息地丧失）",
+    "after": "栖息地",
+    "usageSuffix": ""
+  },
+  {
+    "index": 285,
+    "d": 29,
+    "w": "thrive",
+    "before": "繁衍兴旺、长得好（≠survive 只是活着）",
+    "after": "繁衍兴旺、长得好",
+    "usageSuffix": ""
+  },
+  {
+    "index": 290,
+    "d": 30,
+    "w": "dormant",
+    "before": "休眠的、蛰伏不活动的（≠latent）",
+    "after": "休眠的、蛰伏不活动的",
+    "usageSuffix": ""
+  },
+  {
+    "index": 295,
+    "d": 30,
+    "w": "taper",
+    "before": "逐渐变细、慢慢减少（taper off）",
+    "after": "逐渐变细、慢慢减少",
+    "usageSuffix": ""
+  },
+  {
+    "index": 299,
+    "d": 30,
+    "w": "call it a night",
+    "before": "今晚就到这儿（call it a day 的夜间版）",
+    "after": "今晚就到这儿",
+    "usageSuffix": ""
+  },
+  {
+    "index": 301,
+    "d": 31,
+    "w": "cursory",
+    "before": "草草的、走马观花的（≠rigorous）",
+    "after": "草草的、走马观花的",
+    "usageSuffix": " 易混提示：rigorous 强调严格缜密，与 cursory 的草草查看不同。"
+  },
+  {
+    "index": 304,
+    "d": 31,
+    "w": "sodden",
+    "before": "湿透的、浸饱水的（≠humid 空气闷湿）",
+    "after": "湿透的、浸饱水的",
+    "usageSuffix": ""
+  },
+  {
+    "index": 311,
+    "d": 32,
+    "w": "expedient",
+    "before": "图方便的、权宜的（≠expedite 加快）",
+    "after": "图方便的、权宜的",
+    "usageSuffix": ""
+  },
+  {
+    "index": 313,
+    "d": 32,
+    "w": "amenable",
+    "before": "愿意配合的、听得进意见的（amenable to）",
+    "after": "愿意配合的、听得进意见的",
+    "usageSuffix": ""
+  },
+  {
+    "index": 316,
+    "d": 32,
+    "w": "go back to the drawing board",
+    "before": "推翻重新设计（比 square one 更强）",
+    "after": "推翻重新设计",
+    "usageSuffix": ""
+  }
+]

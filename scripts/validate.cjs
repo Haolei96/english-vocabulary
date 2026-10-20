@@ -14,16 +14,36 @@ assert.ok(expression, 'Missing DATA array');
 const data = vm.runInNewContext(expression, {}, {timeout: 1000});
 assert.ok(Array.isArray(data) && data.length >= 330, 'History is incomplete');
 
+// Keep the original historical hashes while allowing the precise prompt cleanup
+// and two additional examples per item authorized on 2026-10-20.
+const promptMigrations = require('./prompt-migrations.json');
+const originalFields = data.map(item =>
+  Object.fromEntries(Object.entries(item).filter(([key]) => key !== 'extraExamples')));
+const migratedIndices = new Set();
+for (const migration of promptMigrations) {
+  const {index, d, w, before, after, usageSuffix} = migration;
+  assert.ok(Number.isInteger(index) && index >= 0 && index < data.length && !migratedIndices.has(index),
+    'Invalid or repeated prompt migration');
+  migratedIndices.add(index);
+  const item = originalFields[index];
+  assert.equal(item.d, d, `Prompt migration day changed: ${w}`);
+  assert.equal(item.w, w, `Prompt migration word changed: ${w}`);
+  assert.equal(item.cn, after, `Approved Chinese prompt changed: ${w}`);
+  item.cn = before;
+  if (usageSuffix) {
+    assert.ok(item.usage.endsWith(usageSuffix), `Moved usage hint missing: ${w}`);
+    item.usage = item.usage.slice(0, -usageSuffix.length);
+  }
+}
 // The user authorized adding usage tips to Day 1–32 on 2026-10-10.
-// Keep the original history baseline: only omit those newly added fields.
-const history = data.slice(0, 330).map(item => item.d <= 32
+const history = originalFields.slice(0, 330).map(item => item.d <= 32
   ? Object.fromEntries(Object.entries(item).filter(([key]) => key !== 'usage'))
   : item);
 const digest = crypto.createHash('sha256').update(JSON.stringify(history)).digest('hex');
 assert.equal(digest, '4cb80dff43bc581daae3597ea10ca55843e5d1f79831102cbc2e92387f44238f',
   'Day 1–33 history changed; review any intentional correction before updating the baseline');
 const tipDigest = crypto.createHash('sha256')
-  .update(JSON.stringify(data.slice(0, 320).map(item => item.usage))).digest('hex');
+  .update(JSON.stringify(originalFields.slice(0, 320).map(item => item.usage))).digest('hex');
 assert.equal(tipDigest, '70986fd59313ca3405b2d990554bdf05485b93c679c06868c59643607e46c130',
   'Day 1–32 usage tips changed; review any intentional correction before updating the baseline');
 
@@ -36,8 +56,20 @@ for (const item of data) {
   for (const key of ['w', 'pos', 'p', 'cn', 'usage', 'k', 'ex', 'tr']) {
     assert.ok(typeof item[key] === 'string' && item[key].trim(), `Day ${item.d}: missing ${key}`);
   }
+  assert.ok(!/[A-Za-z]/.test(item.cn), `${item.w}: Chinese prompt contains English; move hints to usage`);
   assert.ok(item.p.startsWith('/') && item.p.endsWith('/'), `${item.w}: invalid IPA format`);
   assert.ok(item.ex.toLowerCase().includes(item.k.toLowerCase()), `${item.w}: cloze text missing from example`);
+  assert.ok(Array.isArray(item.extraExamples) && item.extraExamples.length === 2,
+    `${item.w}: expected two extra examples`);
+  const sentences = new Set([normalize(item.ex)]);
+  for (const example of item.extraExamples) {
+    assert.ok(example && typeof example.ex === 'string' && example.ex.trim() && /[A-Za-z]/.test(example.ex),
+      `${item.w}: missing extra English example`);
+    assert.ok(typeof example.tr === 'string' && example.tr.trim() && /[\u3400-\u9fff]/.test(example.tr),
+      `${item.w}: missing extra Chinese translation`);
+    assert.ok(!sentences.has(normalize(example.ex)), `${item.w}: repeated example sentence`);
+    sentences.add(normalize(example.ex));
+  }
   assert.ok(item.kind === undefined || item.kind === 'reading', `${item.w}: invalid learning kind`);
   if (item.kind === 'reading') {
     assert.ok(item.source && Number.isInteger(item.source.page) && item.source.page > 0,
@@ -91,7 +123,8 @@ for (let day = 35; day <= latestDay; day++) {
 assert.equal(data.length, latestDay * 10, 'Total and learning days disagree');
 const phrases = data.filter(x => x.pos.startsWith('phr')).length;
 console.log(`Validated Day 1–${latestDay}: ${data.length} items (${data.length-phrases} words + ${phrases} phrases).`);
-console.log('Day 1–33 original fields unchanged; Day 1–32 tips preserved; all items have usage tips.');
+console.log(`Original history and usage baselines preserved after ${promptMigrations.length} approved prompt migrations; no English in Chinese prompts.`);
+console.log(`All ${data.length} items have usage tips and three bilingual examples (${data.length * 3} total).`);
 console.log(`Latest publication: ${byDay.get(latestDay)[0].date || 'historical date unknown'}.`);
 const readingItems = data.filter(x => x.kind === 'reading').length;
 if (readingItems) console.log(`Reading supplements: ${readingItems} items; original source references complete. Daily date limits remain enforced.`);

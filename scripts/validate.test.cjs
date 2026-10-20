@@ -1,4 +1,4 @@
-// Exercise the reading-import exception without weakening daily publication limits.
+// Exercise example enrichment, prompt cleanup, reading imports and daily limits.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -17,6 +17,7 @@ const nextDate = next.toISOString().slice(0,10);
 const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'vocabulary-validation-'));
 fs.mkdirSync(path.join(fixture, 'scripts'));
 fs.copyFileSync(path.join(__dirname, 'validate.cjs'), path.join(fixture, 'scripts', 'validate.cjs'));
+fs.copyFileSync(path.join(__dirname, 'prompt-migrations.json'), path.join(fixture, 'scripts', 'prompt-migrations.json'));
 
 function check(name, mutate, expectedSuccess, expectedError) {
   const items = JSON.parse(JSON.stringify(baseline));
@@ -49,7 +50,18 @@ try {
   check('six plus four required', items => { items.find(x=>x.kind==='reading' && x.pos==='phr.').pos = 'n.'; }, false, /expected 4 phrases/);
   check('original history preserved', items => { items[0].cn = 'changed'; }, false, /history changed/);
   check('backdated daily update rejected', items => { items.filter(x=>x.d===38).forEach(x=>x.date='2026-10-12'); }, false, /Two daily learning days|date did not advance/);
-  console.log('Passed 10 validation regression checks, including next-day publication and same-date rejection.');
+  check('missing extra examples rejected', items => { delete items[0].extraExamples; }, false, /expected two extra examples/);
+  check('one extra example rejected', items => { items[0].extraExamples.pop(); }, false, /expected two extra examples/);
+  check('blank English example rejected', items => { items[0].extraExamples[0].ex = ' '; }, false, /missing extra English example/);
+  check('blank translation rejected', items => { items[0].extraExamples[0].tr = ' '; }, false, /missing extra Chinese translation/);
+  check('repeated extra example rejected', items => { items[0].extraExamples[1].ex = items[0].extraExamples[0].ex; }, false, /repeated example sentence/);
+  check('primary example reused as extra rejected', items => { items[0].extraExamples[0].ex = items[0].ex; }, false, /repeated example sentence/);
+  check('English hint in Chinese prompt rejected', items => { items[380].cn += '（soothe）'; }, false, /Chinese prompt contains English/);
+  check('cleaned prompt cannot regress', items => { items[100].cn = '证明、证实（attest to sth）'; }, false, /Approved Chinese prompt changed/);
+  check('moved hint cannot disappear', items => { items[121].usage = items[121].usage.replace(/ 语域提示：.*$/, ''); }, false, /Moved usage hint missing/);
+  check('original usage cannot disappear', items => { items[0].usage = '新提示替代旧提示。'; }, false, /usage tips changed/);
+  check('original primary example protected', items => { items[0].ex += ' This is changed.'; }, false, /history changed/);
+  console.log('Passed 21 validation regression checks: examples, prompt cleanup, original history, reading imports and daily publication limits.');
 } finally {
   fs.rmSync(fixture, {recursive:true, force:true});
 }
